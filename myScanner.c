@@ -1,6 +1,6 @@
 %{
-#include "myScanner.h"
-}
+#include "y.tab.h"
+%}
 
 digit		[0-9]
 decimal		-?[0-9]+\.[0-9]+
