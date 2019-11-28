@@ -1,4 +1,4 @@
-
+// NO VA ESTO
 typedef enum {
 	IF,
 	ELSE,
@@ -37,8 +37,6 @@ typedef enum {
 	CLOSE_BRACES,
 	OPEN_PARENTHESES,
 	CLOSE_PARENTHESES,
-
-
 
 	/* types */
 	INTEGER,
