@@ -50,7 +50,9 @@ variable(const char *var)
 }
 
 OperationNode *
-operation(const Node *first, const Node *second, const char *oper)
+operation(const Node *first, 
+          const char *oper, \
+          const Node *second)
 {
     OperationNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
@@ -66,7 +68,9 @@ operation(const Node *first, const Node *second, const char *oper)
 }
 
 SingleOperationNode *
-singleOperation(const Node *node, const char *oper) {
+singleOperation(const Node *node, 
+                const char *oper) 
+{
     SingleOperationNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
 
@@ -80,19 +84,25 @@ singleOperation(const Node *node, const char *oper) {
 }
 
 IfNode *
-ifNode(const Node *condition, const Node *elifN, const Node *elseN)
+ifNode(const Node *ifN,  
+       const Node *ifBlock, 
+       const Node *elifN, 
+       const Node *elifBlock, 
+       const Node *elseN)
 {
     IfNode *node    = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
     node->type      = TYPE_IF;
-    node->condition = (Node *)condition;
+    node->ifNode    = (Node *)ifN;
+    node->ifBlock   = (Node *)ifBlock;
     node->elifNode  = (Node *)elifN;
+    node->elifBlock = (Node *)elifBlock;
     node->elseNode  = (Node *)elseN;
     return node;
 }
 
 CalculateWhileNode *
-while(const Node *condition, const Node *block)
+whileNode(const Node *condition, const Node *block)
 {
     CalculateWhileNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
@@ -114,6 +124,7 @@ instructionsList(const Node *node)
     return list;
 }
 
+// DO WE NEED THIS???
 ListNode *
 addInstruction(const ListNode *list, const Node *node)
 {
@@ -149,7 +160,8 @@ block(const ListNode *instructions)
     return node;
 }
 
-Node *empty()
+Node *
+empty(void)
 {
     Node *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;

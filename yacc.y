@@ -6,10 +6,6 @@ void yyerror (char *s);
 #include <stdio.h>
 #include <stdlib.h>
 
-/* For the single operation ++ / -- */
-#define ADD 1
-#define SUBTRACT 0
-
 // ACA VAN LAS DECLARACIONES DE LAS FUNCIONES
 %}
 
@@ -22,7 +18,9 @@ void yyerror (char *s);
 /* Which of the productions that follow 
  * in the middle section is going to be
  * my starting rule */
-%start
+%start instructions
+
+%parse-param { ListNode ** code }
 
 /* ----------------- TOKENS ---------------------
  * Token that I'm expecting from the lexical 
@@ -36,6 +34,7 @@ void yyerror (char *s);
 %token COMA, SEMI_COLON, OPEN_BRACES, CLOSE_BRACES, OPEN_PARENTHESES, CLOSE_PARENTHESES
 %token INTEGER, DOUBLE, FUNCTION, COORDINATES, VARIABLE, STRING
 %token NEW_LINE, ASSIGN_FUNC
+%token BEGIN, END
 
 /* ---------------------------------------------
 
@@ -49,45 +48,42 @@ void yyerror (char *s);
 
 %%
 instructions:
-	  block
-	| instructions block
+	  BEGIN block END { *code = instructionList($2);   $$ = *code; }
+	| BEGIN END		  { *code = instructionList(NULL); $$ = *code; }
 	;
 
 block:
-	  braces
-	| if_block
-	| loop_block
-	| math_block
-	| slope_block
-	| function_block
-	| print_block
-	| return_block
-	| expression
-	| new_line
+	  braces 			{ $$ = bloque($1); }
+	| if_block 			{ $$ = $1; }
+	| loop_block		{ $$ = $1; }
+	| math_block		{ $$ = $1; }
+	| slope_block		{ $$ = $1; }
+	| function_block	{ $$ = $1; }
+	| print_block		{ $$ = $1; }
+	| return_block		{ $$ = $1; }
+	| expression 		{ $$ = instruction($1); }
+	| new_line 			{ $$ = empty(); }
 	;
 
 braces:
-	  OPEN_BRACES CLOSE_BRACES
-	| OPEN_BRACES instructions CLOSE_BRACES
+	  OPEN_BRACES CLOSE_BRACES				{ $$ = instructionList(NULL); }
+	| OPEN_BRACES instructions CLOSE_BRACES { $$ = $2; }
 	;
 
 if_block:
 	  IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
-	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces elif_block
+	  	{ $$ = ifNode($3, $5, NULL, NULL, NULL); }
+	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
+	  	{ $$ = ifNode($3, $5, $8, $10, NULL); }
+	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
+	 	{ $$ = ifNode($3, $5, $8, $10, $12); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
-	;
-
-elif_block:
-	  ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
-	| ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
-	;
-
-while_expression:
-	WHILE OPEN_PARENTHESES expression CLOSE_PARENTESIS SEMI_COLON
+		{ $$ = ifNode($3, $5, NULL, NULL, $7); }
 	;
 
 loop_block:
-	DO braces while_expression
+	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTESIS SEMI_COLON 
+		{ $$ = whileNode($5, $2); }
 	;
 
 math_block:
@@ -112,96 +108,109 @@ function_definition:
 	//UNKNOWN FOR NOW
 
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARATHESES SEMI_COLON
+	PRINT OPEN_PARENTHESES expression CLOSE_PARATHESES SEMI_COLON { $$ = print($3); }
 	;
 
 return_block:
-	RETURN expression SEMI_COLON
+	RETURN expression SEMI_COLON { $$ = returnNode($2); }
 	;
 
 constant:
-	  INTEGER
-	| DOUBLE
+	  INTEGER { $$ = constant($1); }
+	| DOUBLE  { $$ = constant($1); }
+	;
 
 variable:
-	VARIABLE
+	VARIABLE  { $$ = variable($1); }
 	;
 
 base_expression:
-	  constant
-	| variable
-    | STRING
-    | OPEN_PARENTHESES expression CLOSE_PARATHESES
+	  constant { $$ = $1; }
+	| variable { $$ = $1; }
+    | STRING   { $$ = string($1); }
+    | OPEN_PARENTHESES expression CLOSE_PARATHESES { $$ = $2; }
     ;
 
-operation:
-	  simple_expression
-	| count_operation
-	| relational_operation
-	| logic_operation
-	;
-
-count_op:
-	  MULTI
-	| DIV
-	| MODULE
-	| SUM
-	| SUBTRACT
-	;
-
-count_operation:
-	operation count_op operation
-	;
-
-relational_op:
-	  GT_OP
-	| GTE_OP
-	| LT_OP
-	| LTE_OP
-	| EQUAL_OP
-	| NOT_EQUAL_OP
-	;
-
-relational_operation:
-	operation relational_op operation
-	;
-
-logic_op:
-	  AND_OP
-	| OR_OP
-	;
-
-logic_operation:
-	  operation AND_OP operation
-	| operation OR_OP operation
-	;
-
-assign_op:
-	  ASSIGN
-	| ASSIGN_SUM
-	| ASSIGN_SUBTRACT
-	| ASSIGN_DIV
-	| ASSIGN_MULTI
-	;
-
-assign_operation:
-	variable assign_op operation
-	;
-
 simple_expression:
-	  base_expression
-	| NOT_OP relational_operation
-	| NOT_OP logic_operation
+	  base_expression				{ $$ = $1; }
+	| NOT_OP relational_operation 	{ $$ = negation($2); }
+	| NOT_OP logic_operation 		{ $$ = negation($2); }
 	;
 
 expression:
-	  operation
-	| assign_operation
+	  simple_expression 	{ $$ = $1; }
+	| count_operation		{ $$ = $1; }
+	| relational_operation	{ $$ = $1; }
+	| logic_operation		{ $$ = $1; }
+	;
+
+count_op:
+	  MULTI 	{ strcpy($$, "*"); }
+	| DIV 		{ strcpy($$, "/"); }
+	| MODULE 	{ strcpy($$, "%"); }
+	| SUM 		{ strcpy($$, "+"); }
+	| SUBTRACT 	{ strcpy($$, "-"); }
+	;
+
+count_operation:
+	expression count_op expression { $$ = operation($1, $2, $3); }
+	;
+
+relational_op:
+	  GT_OP 		{ strcpy($$, ">"); }
+	| GTE_OP		{ strcpy($$,">="); }
+	| LT_OP 		{ strcpy($$, "<"); }
+	| LTE_OP 		{ strcpy($$,"<="); }
+	| EQUAL_OP 		{ strcpy($$,"=="); }
+	| NOT_EQUAL_OP  { strcpy($$,"!="); }
+	;
+
+relational_operation:
+	expression relational_op expression { $$ = operation($1, $2, $3); }
+	;
+
+logic_op:
+	  AND_OP { strcpy($$, "&&"); }
+	| OR_OP  { strcpy($$, "||"); }
+	;
+
+logic_operation:
+	  expression AND_OP expression  { $$ = operation($1, $2, $3); }
+	| expression OR_OP expression   { $$ = operation($1, $2, $3); }
+	;
+
+one_op:
+	  SUM_ONE		{ strcpy($$, "++"); }
+	| SUBTRACT_ONE	{ strcpy($$, "--"); }
+	;
+
+one_operation:
+	variable one_op { $$ = single_operation($1, $2); }
+	;
+
+assign_op:
+	  ASSIGN 			{ strcpy($$, "="); }
+	| ASSIGN_SUM 		{ strcpy($$,"+="); }
+	| ASSIGN_SUBTRACT	{ strcpy($$,"-="); }
+	| ASSIGN_DIV		{ strcpy($$,"/="); }
+	| ASSIGN_MULTI		{ strcpy($$,"*="); }
+	;
+
+assign_operation:
+	variable assign_op operation { $$ = operation($1, $2, $3); }
 	;
 
 %%
 //ACA VA LAS FUNCIONES QUE USAMOS EN PRODUCCIONES Y DEFINIMOS EN LA PRIMERA PARTE
 
-void yyerror (char *s) {
+void 
+yyerror(ListNode ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
+	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
+	exit(EXIT_FAILURE);
+}
+
+int
+main(void) {
+
 }

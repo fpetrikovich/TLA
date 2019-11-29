@@ -33,7 +33,8 @@ new_line 	\n
 "summation"				return SUMMATION;
 "product"				return PRODUCT;
 "slope"					return SLOPE;
-"!"						return FACTORIAL;
+"!!"					return FACTORIAL;
+"!"						return NOT_OP;
 "function"				return FUNCTION; //NO SE SI VA ESTA?
 "<-"					return ASSIGN_FUNC;
 "(' ')?==(' ')?"		return EQUAL_OP;
@@ -46,10 +47,12 @@ new_line 	\n
 "(' ')?||(' ')?"		return OR_OP;
 ":"						return COMA;
 ";"						return SEMI_COLON;
-("{")					return OPEN_BRACES;
-("}")					return CLOSE_BRACES;
+"{"						return OPEN_BRACES;
+"}"						return CLOSE_BRACES;
 "("						return OPEN_PARENTHESES;
 ")"						return CLOSE_PARENTHESES;
+"begin"					return BEGIN;
+"end"					return END;
 
 /* to do --> involves yacc and idk that yet */
 {integer} 

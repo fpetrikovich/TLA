@@ -74,8 +74,10 @@ typedef struct {
 /* To handle if / elif / else expressions */
 typedef struct {
   NodeType type;
-  Node *condition;
+  Node *ifNode;
+  Node *ifBlock;
   Node *elifNode;
+  Node *elifBlock;
   Node *elseNode;
 } IfNode;
 
