@@ -5,11 +5,12 @@
 
 /* Creates a basic token */
 Token *
-createToken(TokenType type) {
+createToken(TokenType type, DataType data) {
     Token *token = malloc(sizeof *token);
     if(!isValid(token)) return NULL;
 
     token->type = type;
+    token->data = data;
     return token;
 }
 
@@ -21,6 +22,7 @@ createStatementToken(Token *statement) {
   if(!isValid(token)) return NULL;
 
   token->type       = STATEMENT_TOKEN;
+  token->data       = NULL;
   token->statement  = statement;
   return token;
 }
@@ -51,6 +53,7 @@ createStatementList(const Token *statement) {
   if(!isValid(list)) return NULL;
   
   list->type    = STATEMENTS_TOKEN;
+  list->data    = NULL;
   list->current = (Token *)statement;   //First statement on the list
   list->next    = NULL;
   return list;
@@ -64,6 +67,7 @@ createBlockToken(const TokenList *statements) {
   if(!isValid(token)) return NULL;
   
   token->type       = BLOCK_TOKEN;
+  token->data       = NULL;
   token->statements = (TokenList *)statements;
   return token;
 }
@@ -76,6 +80,7 @@ createIfToken(const Token *ifCondition, const Token *ifBlock, const Token *elifC
   if(!isValid(token)) return NULL;
   
   token->type           = IF_TOKEN;
+  token->data           = NULL;
   token->ifCondition    = (Token *)ifCondition;
   token->ifBlock        = (Token *)ifBlock;
   token->elifCondition  = (Token *)elifCondition;
@@ -92,6 +97,7 @@ createCalculateWhileToken(const Token *condition, const Token *block) {
   if(!isValid(token)) return NULL;
   
   token->type       = WHILE_TOKEN;
+  token->data       = NULL;
   token->condition  = (Token *)condition;
   token->block      = (Token *)block;
   return token;
@@ -105,6 +111,7 @@ createOperationToken(const Token *first, const Token *second, const char *oper) 
   if(!isValid(token)) return NULL;
   
   token->type     = OPERATION_TOKEN;
+  token->data     = first->data;
   token->first    = (Token *)first;
   token->second   = (Token *)second;
   token->op       = calloc(strlen(oper) + 1, sizeof(char));
@@ -126,6 +133,7 @@ createSingleOperationToken(const Token *operand, const char *oper) {
     if(!isValid(token)) return NULL;
 
     token->type     = SINGLE_OPERATION_TOKEN;
+    token->data     = DATA_NUMBER;
     token->operand  = (Token *)operand;
     token->op       = calloc(3, sizeof(char)); /* 2 for the operation and 1 for the 0 */
     
@@ -146,6 +154,7 @@ createStringToken(const char *string) {
   if(!isValid(token)) return NULL;
   
   token->type   = STRING_TOKEN;
+  token->data   = DATA_STRING;
   token->string = calloc(strlen(string) + 1, sizeof(char));
   
   if(!isValid(token->string)) {
@@ -165,6 +174,7 @@ createConstantToken(const char *constant) {
   if(!isValid(token)) return NULL;
   
   token->type     = CONSTANT_TOKEN;
+  token->data     = DATA_NUMBER;
   token->constant = calloc(strlen(constant) + 1, sizeof(char));
   
   if(!isValid(token->constant)) {
@@ -176,16 +186,17 @@ createConstantToken(const char *constant) {
   return token;
 }
 
-/* Creates a toker for a variable */
+/* Creates a token for a variable */
 VariableToken *
-createVariableToken(const char *var) {
+createVariableToken(const char *var, const Token *tokenT) {
   VariableToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
   token->type     = VARIABLE_TOKEN;
+  token->data     = tokenT->data;
   token->stored   = NULL;
   token->declared = FALSE;
-  token->name = calloc(strlen(var) + 1, sizeof(char));
+  token->name     = calloc(strlen(var) + 1, sizeof(char));
   
   if(!isValid(token->name)) {
     free(token);
@@ -196,19 +207,6 @@ createVariableToken(const char *var) {
   return token;
 }
 
-/* Creates a condition token */
-ConditionToken *
-createConditionToken(const Token *first, const Token *second, const Token *third) {
-  ConditionToken *token = malloc(sizeof *token);
-  if(!isValid(token)) return NULL;
-  
-  token->type   = CONDITION_TOKEN;
-  token->first  = (Token *)first;
-  token->second = (Token *)second;
-  token->third  = (Token *)third;
-  return token;
-}
-
 /* Creates a return token */
 ReturnToken *
 createReturnToken(const Token *expression) {
@@ -216,6 +214,7 @@ createReturnToken(const Token *expression) {
   if(!isValid(token)) return NULL;
   
   token->type       = RETURN_TOKEN;
+  token->data       = NULL;
   token->expression = (Token *)expression;
   return token;
 }
@@ -227,6 +226,7 @@ createEmptyToken() {
   if(!isValid(token)) return NULL;
   
   token->type = NULL_TOKEN;
+  token->data = NULL;
   return token;
 }
 
@@ -237,6 +237,7 @@ createNegationToken(Token *expression) {
   if(!isValid(token)) return NULL;
   
   token->type       = NEGATION_TOKEN;
+  token->data       = DATA_NUMBER;      //Negation works with numbers not strings
   token->expression = expression;
   return token;
 }
@@ -248,6 +249,7 @@ createPrintToken(Token *expression) {
   if(!isValid(token)) return NULL;
   
   token->type       = PRINT_TOKEN;
+  token->data       = NULL;
   token->expression = expression;
   return token;
 }

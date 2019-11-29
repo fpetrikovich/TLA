@@ -18,8 +18,7 @@ extern int yylineno;
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	int 	  interger;
-	double 	  decimal;
+	NodeType  
 	char 	  string[500];
 	Node     *node;
 	NodeList *list;
@@ -42,8 +41,7 @@ extern int yylineno;
 %token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
-%token INTEGER DOUBLE FUNCTION COORDINATES VARIABLE STRING
-%token INTEGER_VAL DOUBLE_VAL STRING_VAL
+%token NUMBER NUMBER_VAL FUNCTION COORDINATES VARIABLE STRING STRING_VAL
 %token NEW_LINE ASSIGN_FUNC
 %token BEGIN END
 
@@ -57,7 +55,7 @@ extern int yylineno;
 %type <node> count_operation assign_operation relational_operation logic_operation one_operation
 %type <node> simple_expression base_expression expression
 
-%type <string> VARIABLE STRING_VAL INTEGER_VAL DOUBLE_VAL constant variable
+%type <string> VARIABLE STRING_VAL NUMBER_VAL constant variable
 %type <string> count_op assign_op relational_op logic_op one_op
 
 
@@ -66,13 +64,41 @@ extern int yylineno;
 
 type:
 	  func_type   { $$ = $1; }
-	| FUNCTION    { $$ = node(TYPE_FUNCTION); }
-	| COORDINATES { $$ = node(TYPE_COORDINATES); }
+	| FUNCTION    { $$ = node(??, DATA_FUNCTION); }
+	| COORDINATES { $$ = node(??, DATA_COORDINATES); }
 /* types allowed in a function */
 func_type:
-	  INTEGER { $$ = node(TYPE_INTEGER); }
-	| DOUBLE  { $$ = node(TYPE_DOUBLE); }
-	| STRING  { $$ = node(TYPE_STRING); }
+	  NUMBER  { $$ = node(TYPE_CONSTANT, DATA_NUMBER); }
+	| STRING  { $$ = node(TYPE_STRING, DATA_STRING); }
+	;
+
+statement:
+	  declaration SEMI_COLON
+	| assign_operation SEMI_COLON
+	| one_operation SEMI_COLON
+	| expression SEMI_COLON
+	;
+
+ declaration:
+ 	  type VARIABLE  		{ $$ = variable($2, $1); } 	
+ 	| type assign_operation 
+ 		{	// CHECK!!!!
+ 			$$ = variable((VariableNode *)(((OperationNode *)($2->node))->first)->name, $1);
+ 		}	
+ 	| function_declaration
+
+function_declaration:
+	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
+	;
+
+function_definition:
+	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
+	;
+
+function_value:
+	  function_value NEW_LINE
+	| function_value function_value
+	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
 	;
 
 instructions:
@@ -120,12 +146,11 @@ return_block:
 	;
 
 constant:
-	  INTEGER_VAL { $$ = constant($1); }
-	| DOUBLE_VAL  { $$ = constant($1); }
+	NUMBER_VAL { $$ = constant($1); }
 	;
 
 variable:
-	VARIABLE  { $$ = variable($1); }
+	VARIABLE  { $$ = variable($1, NULL); }
 	;
 
 base_expression:
@@ -157,7 +182,10 @@ count_op:
 	;
 
 count_operation:
-	expression count_op expression { $$ = operation($1, $2, $3); }
+	expression count_op expression { 
+		//matchingType(getType($1->node), getType($3->node));
+		$$ = operation($1, $2, $3); 
+	}
 	;
 
 relational_op:
@@ -170,7 +198,10 @@ relational_op:
 	;
 
 relational_operation:
-	expression relational_op expression { $$ = operation($1, $2, $3); }
+	expression relational_op expression { 
+		//if (getType($1->node) != DATA_NUMBER || getType($3->node) != DATA_NUMBER) yyerror(*code, "Relational operations must involve numbers");
+		$$ = operation($1, $2, $3); 
+	}
 	;
 
 logic_op:
@@ -179,7 +210,10 @@ logic_op:
 	;
 
 logic_operation:
-	expression logic_op expression  { $$ = operation($1, $2, $3); }
+	expression logic_op expression  { 
+		//if (getType($1->node) != DATA_NUMBER || getType($3->node) != DATA_NUMBER) yyerror(*code, "Logic operations must involve numbers");
+		$$ = operation($1, $2, $3); 
+	}
 	;
 
 one_op:
@@ -188,7 +222,10 @@ one_op:
 	;
 
 one_operation:
-	variable one_op { $$ = single_operation($1, $2); }
+	variable one_op { 
+		//if (getType($1->node) != DATA_NUMBER) yyerror(*code, "Must only use ++ or -- with numbers");
+		$$ = single_operation($1, $2); 
+	}
 	;
 
 assign_op:
@@ -198,11 +235,11 @@ assign_op:
 	| ASSIGN_DIV		{ strcpy($$,"/="); }
 	| ASSIGN_MULTI		{ strcpy($$,"*="); }
 	;
-
+code
 assign_operation:
-	  variable assign_op expression   { $$ = operation($1, $2, $3); }
-	| variable assign_op math_block;  { $$ = operation($1, $2, $3); }
-	| variable assign_op slope_block; { $$ = operation($1, $2, $3); }
+	  variable assign_op expression { $$ = operation($1, $2, $3);  }
+	| variable assign_op math_block  { $$ = operation($1, $2, $3); }
+	| variable assign_op slope_block { $$ = operation($1, $2, $3); }
 
 
 math_block:
@@ -212,40 +249,14 @@ math_block:
 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
 
 math_condition:
-	INTEGER SEMI_COLON expression SEMI_COLON INTEGER
+	NUMBER_VAL SEMI_COLON expression SEMI_COLON NUMBER_VAL
 	;
 
 slope_block:
 	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
 	;
 
-statement:
-	  declaration SEMI_COLON
-	| assign_operation SEMI_COLON
-	| one_operation SEMI_COLON
-	| expression SEMI_COLON
-	;
-
- declaration:
- 	  type variable
- 	| function_declaration
-
-function_declaration:
-	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
-	;
-
-function_definition:
-	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
-	;
-
-function_value:
-	  function_value NEW_LINE
-	| function_value function_value
-	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
-	;
-
 %%
-//ACA VA LAS FUNCIONES QUE USAMOS EN PRODUCCIONES Y DEFINIMOS EN LA PRIMERA PARTE
 
 void 
 yyerror(ListNode ** code, char *s) {
@@ -254,7 +265,25 @@ yyerror(ListNode ** code, char *s) {
 	exit(EXIT_FAILURE);
 }
 
+// do these validations go here??????????
+int
+getType(Node *node) {
+	return node->data;
+}
+
+void
+matchingType(int type1, int type2) {
+	if (type1 != type2) {
+		yyerror(*code, "Declaration and definition types do not match.\n");
+	}
+}
+
 int
 main(void) {
-
+	/* Initializing global variable structure */
+	variables = (variableStorage *)malloc(sizeof *variable);
+	if (variables == NULL) {
+		fprintf(stderr, "Unable to allocate memory for variables\n");
+		exit(EXIT_FAILURE);
+	}
 }

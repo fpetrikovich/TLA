@@ -57,13 +57,7 @@ createConstantToken 		(const char *constant);
 
 /* Creation function for a variable token */
 VariableToken *
-createVariableToken 		(const char *var);
-
-/* Creation function for a condition token */
-ConditionToken *
-createConditionToken 		(const Token *first, 
-							 const Token *second, 
-							 const Token *third);
+createVariableToken 		(const char *var, const Token *tokenT);
 
 /* Creation function for a return token */
 ReturnToken *
