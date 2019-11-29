@@ -1,4 +1,4 @@
-#include "nodos.h"
+#include "translationTokens.h"
 
 #ifndef CODE_GENERATOR_H
 #define CODE_GENERATOR_H
@@ -9,7 +9,7 @@
 extern variableStorage *variables;
 
 typedef struct {
-	NodeType type;			  /*Declared data type */
+	TokenType type;			  /*Declared data type */
 	char name[MAX_VAR_NAME];  /* Variable name */
 	char defined;			  /* Variable was defined or not */
 } variableInfo;
@@ -19,7 +19,7 @@ typedef struct {
 	int amount;
 } variableStorage;
 
-VariableNode *
+VariableToken *
 findVariable(const char *name);
 
 #endif

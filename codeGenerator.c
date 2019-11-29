@@ -1,5 +1,4 @@
 #include "codeGenerator.h"
-#include "nodos.h"
 #include <string.h>
 
 variableStorage *variables = NULL;

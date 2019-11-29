@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "nodesInitializer.h"
+#include "tokenFunctions.h"
 #include "codeGenerator.h"
 
 /* What parser will call when 
  * there is a syntactical error */
-void yyerror(ListNode **list, char *s);
+void yyerror(TokenList **list, char *s);
 
 /* Variable for the line count */
 extern int yylineno;
@@ -18,10 +18,10 @@ extern int yylineno;
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	NodeType  
+	TokenType  
 	char 	  string[500];
-	Node     *node;
-	NodeList *list;
+	Token     *token;
+	TokenList *list;
 }
 
 /* Which of the productions that follow 
@@ -29,7 +29,7 @@ extern int yylineno;
  * my starting rule */
 %start instructions
 
-%parse-param { ListNode ** code }
+%parse-param { TokenList ** code }
 
 /* ----------------- TOKENS ---------------------
  * Token that I'm expecting from the lexical 
@@ -50,10 +50,10 @@ extern int yylineno;
 /* Token will be saved in the member
  * in the union */
 %type <list> braces instructions
-%type <node> type func_type block if_block loop_block math_block slope_block
-%type <node> function_block print_block return_block 
-%type <node> count_operation assign_operation relational_operation logic_operation one_operation
-%type <node> simple_expression base_expression expression
+%type <token> type func_type block if_block loop_block math_block slope_block
+%type <token> function_block print_block return_block 
+%type <token> count_operation assign_operation relational_operation logic_operation one_operation
+%type <token> simple_expression base_expression expression
 
 %type <string> VARIABLE STRING_VAL NUMBER_VAL constant variable
 %type <string> count_op assign_op relational_op logic_op one_op
@@ -64,12 +64,12 @@ extern int yylineno;
 
 type:
 	  func_type   { $$ = $1; }
-	| FUNCTION    { $$ = node(??, DATA_FUNCTION); }
-	| COORDINATES { $$ = node(??, DATA_COORDINATES); }
+	| FUNCTION    { $$ = createToken(??, DATA_FUNCTION); }
+	| COORDINATES { $$ = createToken(??, DATA_COORDINATES); }
 /* types allowed in a function */
 func_type:
-	  NUMBER  { $$ = node(TYPE_CONSTANT, DATA_NUMBER); }
-	| STRING  { $$ = node(TYPE_STRING, DATA_STRING); }
+	  NUMBER  { $$ = createToken(CONSTANT_TOKEN, DATA_NUMBER); }
+	| STRING  { $$ = createToken(CONSTANT_STRING, DATA_STRING); }
 	;
 
 statement:
@@ -80,10 +80,10 @@ statement:
 	;
 
  declaration:
- 	  type VARIABLE  		{ $$ = variable($2, $1); } 	
+ 	  type VARIABLE  		{ $$ = createVariableToken($2, $1); } 	
  	| type assign_operation 
  		{	// CHECK!!!!
- 			$$ = variable((VariableNode *)(((OperationNode *)($2->node))->first)->name, $1);
+ 			$$ = createVariableToken((VariableToken *)(((OperationToken *)($2->current))->first)->name, $1);
  		}	
  	| function_declaration
 
@@ -102,68 +102,68 @@ function_value:
 	;
 
 instructions:
-	  BEGIN block END { *code = instructionList($2);   $$ = *code; }
-	| BEGIN END		  { *code = instructionList(NULL); $$ = *code; }
+	  BEGIN block END { *code = createStatementList($2);   $$ = *code; }
+	| BEGIN END		  { *code = createStatementList(NULL); $$ = *code; }
 	;
 
 block:
-	  braces 			{ $$ = bloque($1); }
+	  braces 			{ $$ = createBlockToken($1); }
 	| if_block 			{ $$ = $1; }
 	| loop_block		{ $$ = $1; }
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
-	| statement 		{ $$ = instruction($1); }
-	| NEW_LINE 			{ $$ = empty(); }
+	| statement 		{ $$ = createStatementToken($1); }
+	| NEW_LINE 			{ $$ = createEmptyToken(); }
 	;
 
 braces:
-	  OPEN_BRACES CLOSE_BRACES				{ $$ = instructionList(NULL); }
+	  OPEN_BRACES CLOSE_BRACES				{ $$ = createStatementList(NULL); }
 	| OPEN_BRACES instructions CLOSE_BRACES { $$ = $2; }
 	;
 
 if_block:
 	  IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = ifNode($3, $5, NULL, NULL, NULL); }
+	  	{ $$ = createIfToken($3, $5, NULL, NULL, NULL); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = ifNode($3, $5, $8, $10, NULL); }
+	  	{ $$ = createIfToken($3, $5, $8, $10, NULL); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-	 	{ $$ = ifNode($3, $5, $8, $10, $12); }
+	 	{ $$ = createIfToken($3, $5, $8, $10, $12); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-		{ $$ = ifNode($3, $5, NULL, NULL, $7); }
+		{ $$ = createIfToken($3, $5, NULL, NULL, $7); }
 	;
 
 loop_block:
 	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON 
-		{ $$ = whileNode($5, $2); }
+		{ $$ = createCalculateWhileToken($5, $2); }
 	;
 
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = print($3); }
+	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = createPrintToken($3); }
 	;
 
 return_block:
-	RETURN expression SEMI_COLON { $$ = returnNode($2); }
+	RETURN expression SEMI_COLON { $$ = createReturnToken($2); }
 	;
 
 constant:
-	NUMBER_VAL { $$ = constant($1); }
+	NUMBER_VAL { $$ = createConstantToken($1); }
 	;
 
 variable:
-	VARIABLE  { $$ = variable($1, NULL); }
+	VARIABLE  { $$ = createVariableToken($1, NULL); }
 	;
 
 base_expression:
 	  constant   { $$ = $1; }
 	| variable   { $$ = $1; }
-    | STRING_VAL { $$ = string($1); }
+    | STRING_VAL { $$ = createStringToken($1); }
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
     ;
 
 simple_expression:
 	  base_expression				{ $$ = $1; }
-	| NOT_OP relational_operation 	{ $$ = negation($2); }
-	| NOT_OP logic_operation 		{ $$ = negation($2); }
+	| NOT_OP relational_operation 	{ $$ = createNegationToken($2); }
+	| NOT_OP logic_operation 		{ $$ = createNegationToken($2); }
 	;
 
 expression:
@@ -183,8 +183,8 @@ count_op:
 
 count_operation:
 	expression count_op expression { 
-		//matchingType(getType($1->node), getType($3->node));
-		$$ = operation($1, $2, $3); 
+		//matchingType(getType($1->current), getType($3->current));
+		$$ = createOperationToken($1, $2, $3); 
 	}
 	;
 
@@ -199,8 +199,8 @@ relational_op:
 
 relational_operation:
 	expression relational_op expression { 
-		//if (getType($1->node) != DATA_NUMBER || getType($3->node) != DATA_NUMBER) yyerror(*code, "Relational operations must involve numbers");
-		$$ = operation($1, $2, $3); 
+		//if (getType($1->current) != DATA_NUMBER || getType($3->current) != DATA_NUMBER) yyerror(*code, "Relational operations must involve numbers");
+		$$ = createOperationToken($1, $2, $3); 
 	}
 	;
 
@@ -211,8 +211,8 @@ logic_op:
 
 logic_operation:
 	expression logic_op expression  { 
-		//if (getType($1->node) != DATA_NUMBER || getType($3->node) != DATA_NUMBER) yyerror(*code, "Logic operations must involve numbers");
-		$$ = operation($1, $2, $3); 
+		//if (getType($1->current) != DATA_NUMBER || getType($3->current) != DATA_NUMBER) yyerror(*code, "Logic operations must involve numbers");
+		$$ = createOperationToken($1, $2, $3); 
 	}
 	;
 
@@ -223,8 +223,8 @@ one_op:
 
 one_operation:
 	variable one_op { 
-		//if (getType($1->node) != DATA_NUMBER) yyerror(*code, "Must only use ++ or -- with numbers");
-		$$ = single_operation($1, $2); 
+		//if (getType($1->current) != DATA_NUMBER) yyerror(*code, "Must only use ++ or -- with numbers");
+		$$ = createSingleOperationToken($1, $2); 
 	}
 	;
 
@@ -237,9 +237,9 @@ assign_op:
 	;
 code
 assign_operation:
-	  variable assign_op expression { $$ = operation($1, $2, $3);  }
-	| variable assign_op math_block  { $$ = operation($1, $2, $3); }
-	| variable assign_op slope_block { $$ = operation($1, $2, $3); }
+	  variable assign_op expression { $$ = createOperationToken($1, $2, $3);  }
+	| variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); }
+	| variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); }
 
 
 math_block:
@@ -265,10 +265,10 @@ yyerror(ListNode ** code, char *s) {
 	exit(EXIT_FAILURE);
 }
 
-// do these validations go here??????????
+//TODO: do these validations go here??????????
 int
-getType(Node *node) {
-	return node->data;
+getType(Token *token) {
+	return token->data;
 }
 
 void
