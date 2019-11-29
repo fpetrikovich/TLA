@@ -1,18 +1,28 @@
 %{
-/* What parser will call when 
- * there is a syntactical error */
-void yyerror (char *s);	
 
 #include <stdio.h>
 #include <stdlib.h>
 
-// ACA VAN LAS DECLARACIONES DE LAS FUNCIONES
+#include "nodesInitializer.h"
+#include "codeGenerator.h"
+
+/* What parser will call when 
+ * there is a syntactical error */
+void yyerror(ListNode **list, char *s);
+
+/* Variable for the line count */
+extern int yylineno;
+
 %}
 
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	int foo;
+	int 	  interger;
+	double 	  decimal;
+	char 	  string[500];
+	Node     *node;
+	NodeList *list;
 }
 
 /* Which of the productions that follow 
@@ -26,27 +36,45 @@ void yyerror (char *s);
  * Token that I'm expecting from the lexical 
  * analyzer (will save as defines in tab.h) */
 
-%token IF, ELIF, ELSE, DO, WHILE, PRINT
-%token ASSIGN_SUM, ASSIGN_MULTI, ASSIGN_DIV, ASSIGN_SUBTRACT
-%token SUM, SUM_ONE, MULTI, DIV, SUBTRACT, SUBTRACT_ONE, MODULE, ASSIGN
-%token PRODUCT_OF, SUM_OF, SUMMATION, PRODUCT, FACTORIAL, SLOPE
-%token EQUAL_OP, NOT_EQUAL_OP, GT_OP, GTE_OP, LT_OP, LTE_OP, AND_OP, OR_OP, NOT_OP
-%token COMA, SEMI_COLON, OPEN_BRACES, CLOSE_BRACES, OPEN_PARENTHESES, CLOSE_PARENTHESES
-%token INTEGER, DOUBLE, FUNCTION, COORDINATES, VARIABLE, STRING
-%token NEW_LINE, ASSIGN_FUNC
-%token BEGIN, END
+%token IF ELIF ELSE DO WHILE PRINT RETURN
+%token ASSIGN_SUM ASSIGN_MULTI ASSIGN_DIV ASSIGN_SUBTRACT ASSIGN_FUNC
+%token SUM SUM_ONE MULTI DIV SUBTRACT SUBTRACT_ONE MODULE ASSIGN
+%token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
+%token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
+%token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
+%token INTEGER DOUBLE FUNCTION COORDINATES VARIABLE STRING
+%token INTEGER_VAL DOUBLE_VAL STRING_VAL
+%token NEW_LINE ASSIGN_FUNC
+%token BEGIN END
 
 /* ---------------------------------------------
 
 /* Token will be saved in the member
- * <foo> in the union */
-%token <foo> token
+ * in the union */
+%type <list> braces instructions
+%type <node> type func_type block if_block loop_block math_block slope_block
+%type <node> function_block print_block return_block 
+%type <node> count_operation assign_operation relational_operation logic_operation one_operation
+%type <node> simple_expression base_expression expression
 
-/* Assigning types to the left hand non terminals
- * that are going to appear in my grammar */
-%type <foo> bar bar2
+%type <string> VARIABLE STRING_VAL INTEGER_VAL DOUBLE_VAL constant variable
+%type <string> count_op assign_op relational_op logic_op one_op
+
+
 
 %%
+
+type:
+	  func_type   { $$ = $1; }
+	| FUNCTION    { $$ = node(TYPE_FUNCTION); }
+	| COORDINATES { $$ = node(TYPE_COORDINATES); }
+/* types allowed in a function */
+func_type:
+	  INTEGER { $$ = node(TYPE_INTEGER); }
+	| DOUBLE  { $$ = node(TYPE_DOUBLE); }
+	| STRING  { $$ = node(TYPE_STRING); }
+	;
+
 instructions:
 	  BEGIN block END { *code = instructionList($2);   $$ = *code; }
 	| BEGIN END		  { *code = instructionList(NULL); $$ = *code; }
@@ -56,13 +84,10 @@ block:
 	  braces 			{ $$ = bloque($1); }
 	| if_block 			{ $$ = $1; }
 	| loop_block		{ $$ = $1; }
-	| math_block		{ $$ = $1; }
-	| slope_block		{ $$ = $1; }
-	| function_block	{ $$ = $1; }
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
-	| expression 		{ $$ = instruction($1); }
-	| new_line 			{ $$ = empty(); }
+	| statement 		{ $$ = instruction($1); }
+	| NEW_LINE 			{ $$ = empty(); }
 	;
 
 braces:
@@ -71,44 +96,23 @@ braces:
 	;
 
 if_block:
-	  IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
+	  IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
 	  	{ $$ = ifNode($3, $5, NULL, NULL, NULL); }
-	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
+	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
 	  	{ $$ = ifNode($3, $5, $8, $10, NULL); }
-	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
+	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
 	 	{ $$ = ifNode($3, $5, $8, $10, $12); }
-	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
+	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
 		{ $$ = ifNode($3, $5, NULL, NULL, $7); }
 	;
 
 loop_block:
-	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTESIS SEMI_COLON 
+	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON 
 		{ $$ = whileNode($5, $2); }
 	;
 
-math_block:
-	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARATHESES SEMI_COLON
-	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARATHESES braces SEMI_COLON
-	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARATHESES SEMI_COLON
-	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARATHESES braces SEMI_COLON
-
-math_condition:
-	INTEGER SEMI_COLON expression SEMI_COLON INTEGER
-	;
-
-slope_block:
-	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARATHESES SEMI_COLON
-	;
-
-function_block:
-	FUNTION STRING OPEN_PARENTHESES TYPE variable CLOSE_PARATHESES function_definition
-	;
-
-function_definition:
-	//UNKNOWN FOR NOW
-
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARATHESES SEMI_COLON { $$ = print($3); }
+	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = print($3); }
 	;
 
 return_block:
@@ -116,8 +120,8 @@ return_block:
 	;
 
 constant:
-	  INTEGER { $$ = constant($1); }
-	| DOUBLE  { $$ = constant($1); }
+	  INTEGER_VAL { $$ = constant($1); }
+	| DOUBLE_VAL  { $$ = constant($1); }
 	;
 
 variable:
@@ -125,10 +129,10 @@ variable:
 	;
 
 base_expression:
-	  constant { $$ = $1; }
-	| variable { $$ = $1; }
-    | STRING   { $$ = string($1); }
-    | OPEN_PARENTHESES expression CLOSE_PARATHESES { $$ = $2; }
+	  constant   { $$ = $1; }
+	| variable   { $$ = $1; }
+    | STRING_VAL { $$ = string($1); }
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
     ;
 
 simple_expression:
@@ -175,8 +179,7 @@ logic_op:
 	;
 
 logic_operation:
-	  expression AND_OP expression  { $$ = operation($1, $2, $3); }
-	| expression OR_OP expression   { $$ = operation($1, $2, $3); }
+	expression logic_op expression  { $$ = operation($1, $2, $3); }
 	;
 
 one_op:
@@ -197,7 +200,48 @@ assign_op:
 	;
 
 assign_operation:
-	variable assign_op operation { $$ = operation($1, $2, $3); }
+	  variable assign_op expression   { $$ = operation($1, $2, $3); }
+	| variable assign_op math_block;  { $$ = operation($1, $2, $3); }
+	| variable assign_op slope_block; { $$ = operation($1, $2, $3); }
+
+
+math_block:
+	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+
+math_condition:
+	INTEGER SEMI_COLON expression SEMI_COLON INTEGER
+	;
+
+slope_block:
+	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
+	;
+
+statement:
+	  declaration SEMI_COLON
+	| assign_operation SEMI_COLON
+	| one_operation SEMI_COLON
+	| expression SEMI_COLON
+	;
+
+ declaration:
+ 	  type variable
+ 	| function_declaration
+
+function_declaration:
+	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
+	;
+
+function_definition:
+	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
+	;
+
+function_value:
+	  function_value NEW_LINE
+	| function_value function_value
+	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
 	;
 
 %%

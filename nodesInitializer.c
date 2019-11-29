@@ -5,6 +5,15 @@
 
 static void isValid(void *ptr);
 
+Node *
+node (NodeType type) {
+    Node *node = malloc(sizeof *node);
+    if(!isValid(node)) return NULL;
+
+    node->type = type;
+    return node;
+}
+
 StringNode *
 string(const char *string)
 {

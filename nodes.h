@@ -15,7 +15,13 @@ typedef enum {  TYPE_NULL = 1,
                 TYPE_NEGATION,
                 TYPE_VARIABLE,
                 TYPE_INSTRUCTIONS,
-                TYPE_PRINT
+                TYPE_PRINT,
+                /* For declarations */
+                TYPE_INTEGER,
+                TYPE_DOUBLE,
+                TYPE_STRING,
+                TYPE_FUNCTION,
+                TYPE_COORDINATES
 } NodeType;
 
 typedef struct {
