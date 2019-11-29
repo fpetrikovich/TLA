@@ -4,6 +4,7 @@
 typedef enum {  TYPE_NULL = 1,
                 TYPE_CONSTANT,
                 TYPE_OPERATION,
+                TYPE_SINGLE_OPERATION,
                 TYPE_CONDITIONAL,
                 TYPE_STRING,
                 TYPE_BLOCK,
@@ -17,40 +18,46 @@ typedef enum {  TYPE_NULL = 1,
                 TYPE_PRINT
 } NodeType;
 
-typedef struct Node
-{
+typedef struct {
   NodeType type;
 } Node;
 
-typedef struct ListNode
-{
+typedef struct {
   NodeType type;
   Node *node;
   struct ListNode *next;
 } ListNode;
 
-typedef struct OperationNode
-{
+/* Node for calculations with two
+ * elements and an operand between */
+typedef struct {
   NodeType type;
   Node *first;
   Node *second;
-  char *oper;
+  char *op;
 } OperationNode;
 
-typedef struct ReturnNode
-{
+/* For the X++ and X-- operations */
+typedef struct {
+  NodeType type;
+  Node *node;
+  char *op;
+} SingleOperationNode; 
+
+/* Node for the return expression */
+typedef struct {
   NodeType type;
   Node *expression;
 } ReturnNode;
 
-typedef struct ConstantNode
-{
+/* For numbers --> double and integer */
+typedef struct {
   NodeType type;
   char *constant;
 } ConstantNode;
 
-typedef struct VariableNode
-{
+/* For manipulation of variables */
+typedef struct {
   NodeType type;
   int declared;
   char *name;
@@ -58,55 +65,47 @@ typedef struct VariableNode
   char *variable;
 } VariableNode;
 
-typedef struct ConditionalNode
-{
-  NodeType type;
-  Node *first;
-  Node *second;
-  Node *third;
-} ConditionalNode;
-
-typedef struct PrintNode
-{
+/* Node to print */
+typedef struct {
   NodeType type;
   Node *expression;
 } PrintNode;
 
-typedef struct IfNode
-{
+/* To handle if / elif / else expressions */
+typedef struct {
   NodeType type;
   Node *condition;
-  Node *then;
-  Node *otherwise;
+  Node *elifNode;
+  Node *elseNode;
 } IfNode;
 
-typedef struct WhileNode
-{
+/* For the calculate while loop */
+typedef struct {
   NodeType type;
-  Node *condition;
   Node *block;
-} WhileNode;
+  Node *condition;
+} CalculateWhileNode;
 
-typedef struct BlockNode
-{
+/* Generic block node */
+typedef struct {
   NodeType type;
   ListNode *instructions;
 } BlockNode;
 
-typedef struct StringNode
-{
+/* For the string data type */
+typedef struct {
   NodeType type;
   char *string;
 } StringNode;
 
-typedef struct InstructionNode
-{
+/* For a single instruction */
+typedef struct {
   NodeType type;
   Node *instruction;
 } InstructionNode;
 
-typedef struct NegationNode
-{
+/* For the NOT_OP expressions */
+typedef struct {
   NodeType type;
   Node *expression;
 } NegationNode;

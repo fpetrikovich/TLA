@@ -23,6 +23,7 @@ typedef enum {
 	PRODUCT,
 	FACTORIAL,
 	SLOPE,
+	NOT_OP,
 	EQUAL_OP,
 	NOT_EQUAL_OP,
 	GT_OP,

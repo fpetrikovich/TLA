@@ -6,6 +6,10 @@ void yyerror (char *s);
 #include <stdio.h>
 #include <stdlib.h>
 
+/* For the single operation ++ / -- */
+#define ADD 1
+#define SUBTRACT 0
+
 // ACA VAN LAS DECLARACIONES DE LAS FUNCIONES
 %}
 
@@ -24,14 +28,14 @@ void yyerror (char *s);
  * Token that I'm expecting from the lexical 
  * analyzer (will save as defines in tab.h) */
 
-%token IF, ELSE, DO, WHILE, PRINT
+%token IF, ELIF, ELSE, DO, WHILE, PRINT
 %token ASSIGN_SUM, ASSIGN_MULTI, ASSIGN_DIV, ASSIGN_SUBTRACT
 %token SUM, SUM_ONE, MULTI, DIV, SUBTRACT, SUBTRACT_ONE, MODULE, ASSIGN
 %token PRODUCT_OF, SUM_OF, SUMMATION, PRODUCT, FACTORIAL, SLOPE
 %token EQUAL_OP, NOT_EQUAL_OP, GT_OP, GTE_OP, LT_OP, LTE_OP, AND_OP, OR_OP, NOT_OP
 %token COMA, SEMI_COLON, OPEN_BRACES, CLOSE_BRACES, OPEN_PARENTHESES, CLOSE_PARENTHESES
 %token INTEGER, DOUBLE, FUNCTION, COORDINATES, VARIABLE, STRING
-%token NEW_LINE,
+%token NEW_LINE, ASSIGN_FUNC
 
 /* ---------------------------------------------
 
@@ -54,6 +58,8 @@ block:
 	| if_block
 	| loop_block
 	| math_block
+	| slope_block
+	| function_block
 	| print_block
 	| return_block
 	| expression
@@ -66,8 +72,14 @@ braces:
 	;
 
 if_block:
-	  IF OPEN_PARENTHESES expression CLOSE_PARATHESES
-	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES ELSE braces
+	  IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
+	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces elif_block
+	| IF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
+	;
+
+elif_block:
+	  ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces
+	| ELIF OPEN_PARENTHESES expression CLOSE_PARATHESES braces ELSE braces
 	;
 
 while_expression:
@@ -87,6 +99,17 @@ math_block:
 math_condition:
 	INTEGER SEMI_COLON expression SEMI_COLON INTEGER
 	;
+
+slope_block:
+	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARATHESES SEMI_COLON
+	;
+
+function_block:
+	FUNTION STRING OPEN_PARENTHESES TYPE variable CLOSE_PARATHESES function_definition
+	;
+
+function_definition:
+	//UNKNOWN FOR NOW
 
 print_block:
 	PRINT OPEN_PARENTHESES expression CLOSE_PARATHESES SEMI_COLON

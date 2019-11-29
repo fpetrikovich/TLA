@@ -11,8 +11,9 @@ new_line 	\n
 
 %%
 "if"					return IF;
+"elif"					return ELIF;
 "else"					return ELSE;
-"do"					return DO;
+"calculate"				return DO;
 "while"					return WHILE;
 "print"					return PRINT;
 "(' ')?+=(' ')?"		return ASSIGN_SUM;
@@ -34,6 +35,7 @@ new_line 	\n
 "slope"					return SLOPE;
 "!"						return FACTORIAL;
 "function"				return FUNCTION; //NO SE SI VA ESTA?
+"<-"					return ASSIGN_FUNC;
 "(' ')?==(' ')?"		return EQUAL_OP;
 "(' ')?!=(' ')?"		return NOT_EQUAL_OP;
 "(' ')?>(' ')?"			return GT_OP;
