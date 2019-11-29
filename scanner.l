@@ -3,16 +3,17 @@
 %}
 
 digit		[0-9]
-decimal		-?[0-9]+\.[0-9]+
-integer 	-?[0-9]+
+decimal		-?{digito}+\.{digito}+
+integer 	-?{digito}+
 variable 	[a-zA-Z][a-zA-Z0-9]*
 coordinates \(-?[0-9]+,-?[0-9]+\)
 new_line 	\n
 
 %%
 "if"					return IF;
+"elif"					return ELIF;
 "else"					return ELSE;
-"do"					return DO;
+"calculate"				return DO;
 "while"					return WHILE;
 "print"					return PRINT;
 "(' ')?+=(' ')?"		return ASSIGN_SUM;
@@ -32,8 +33,9 @@ new_line 	\n
 "summation"				return SUMMATION;
 "product"				return PRODUCT;
 "slope"					return SLOPE;
-"!"						return FACTORIAL;
-"function"				return FUNCTION; //NO SE SI VA ESTA?
+"!!"					return FACTORIAL;
+"!"						return NOT_OP;
+"<-"					return ASSIGN_FUNC;
 "(' ')?==(' ')?"		return EQUAL_OP;
 "(' ')?!=(' ')?"		return NOT_EQUAL_OP;
 "(' ')?>(' ')?"			return GT_OP;
@@ -44,18 +46,26 @@ new_line 	\n
 "(' ')?||(' ')?"		return OR_OP;
 ":"						return COMA;
 ";"						return SEMI_COLON;
-("{")					return OPEN_BRACES;
-("}")					return CLOSE_BRACES;
+"{"						return OPEN_BRACES;
+"}"						return CLOSE_BRACES;
 "("						return OPEN_PARENTHESES;
 ")"						return CLOSE_PARENTHESES;
+"begin"					return BEGIN;
+"end"					return END;
+"int"					return INTEGER;
+"double"				return DOUBLE;
+"coordinates"			return COORDINATES;
+"string"				return STRING;	
+"function"				return FUNCTION; //NO SE SI VA ESTA?
+
 
 /* to do --> involves yacc and idk that yet */
-{integer} 
-{decimal}
-{coordinates}
-{variable}
-{new_line}
-
+{integer} 				{ strcpy(yyval.string, yytext); return INTEGER_VAL; }
+{decimal} 				{ strcpy(yyval.string, yytext); return DOUBLE_VAL; }
+{coordinates} 			{ strcpy(yyval.string, yytext); return STRING_VAL; }
+{variable} 				{ strcpy(yyval.string, yytext); return VARIABLE; }
+{new_line} 				{ yylineno++; return NEW_LINE; }
+.
 	
 %%
 int yywrap(void) {

@@ -1,22 +1,33 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "tokenFunctions.h"
 
+/* Creates a basic token */
+Token *
+createToken(TokenType type) {
+    Token *token = malloc(sizeof *token);
+    if(!isValid(token)) return NULL;
+
+    token->type = type;
+    return token;
+}
+
 /* Creates a statement token */
-StatementToken *createStatementToken(Token *statement) {
+StatementToken *
+createStatementToken(Token *statement) {
   //First we allocate memory
-  StatementToken *token = malloc(sizeof(StatementToken));
-  if (token == NULL) {
-    //TODO: See how to handle NULL returns on yacc
-    return NULL;
-  }
+  StatementToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+
   token->type       = STATEMENT_TOKEN;
   token->statement  = statement;
   return token;
 }
 
 /* Adds a statement to the list of statement */
-TokenList *addStatement(const TokenList *list, const Token *statement) {
+TokenList *
+addStatement(const TokenList *list, const Token *statement) {
   //We start from the first token of the list and search the first token with next equal to NULL
   TokenList *currentToken = (TokenList *)list;
   while (currentToken->next != NULL)
@@ -24,9 +35,7 @@ TokenList *addStatement(const TokenList *list, const Token *statement) {
 
   //Once we find the current token who's next is null, we add our new statement to that next
   currentToken->next = createStatementList(statement);
-
-  //TODO: See how to handle failure in memory allocation
-  if(currentToken->next == NULL) {
+  if(!isValid(currentToken->next)) {
     //TODO: Free the previous elements of the list
     return NULL;
   }
@@ -35,13 +44,12 @@ TokenList *addStatement(const TokenList *list, const Token *statement) {
 }
 
 /* Creates a list of statement tokens */
-TokenList *createStatementList(const Token *statement) {
+TokenList *
+createStatementList(const Token *statement) {
   //First we allocate memory
-  TokenList *list = malloc(sizeof(TokenList));
-  if (list == NULL) {
-    //TODO: See how to handle NULL returns on yacc
-    return NULL;
-  }
+  TokenList *list = malloc(sizeof *list);
+  if(!isValid(list)) return NULL;
+  
   list->type    = STATEMENTS_TOKEN;
   list->current = (Token *)statement;   //First statement on the list
   list->next    = NULL;
@@ -49,41 +57,40 @@ TokenList *createStatementList(const Token *statement) {
 }
 
 /* Creates a block token */
-BlockToken *createBlockToken(const TokenList *statements) {
+BlockToken *
+createBlockToken(const TokenList *statements) {
   //First we allocate memory
-  BlockToken *token = malloc(sizeof(BlockToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+  BlockToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type       = BLOCK_TOKEN;
   token->statements = (TokenList *)statements;
   return token;
 }
 
 /* Creates an if token */
-IfToken *createIfToken(const Token *condition, const Token *then, const Token *otherwise) {
+IfToken *
+createIfToken(const Token *ifCondition, const Token *ifBlock, const Token *elifCondition, const Token *elifBlock, const Token *elseBlock) {
   //First we allocate memory
-  IfToken *token = malloc(sizeof(IfToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
-  token->type       = IF_TOKEN;
-  token->condition  = (Token *)condition;
-  token->then       = (Token *)then;
-  token->otherwise  = (Token *)otherwise;
+  IfToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
+  token->type           = IF_TOKEN;
+  token->ifCondition    = (Token *)ifCondition;
+  token->ifBlock        = (Token *)ifBlock;
+  token->elifCondition  = (Token *)elifCondition;
+  token->elifBlock      = (Token *)elifBlock;
+  token->elseBlock      = (Token *)elseBlock;
   return token;
 }
 
 /* Creates a while token */
-WhileToken *createWhileToken(const Token *condition, const Token *block) {
+CalculateWhileToken *
+createCalculateWhileToken(const Token *condition, const Token *block) {
   //First we allocate memory
-  WhileToken *token = malloc(sizeof(WhileToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+  WhileToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type       = WHILE_TOKEN;
   token->condition  = (Token *)condition;
   token->block      = (Token *)block;
@@ -91,87 +98,110 @@ WhileToken *createWhileToken(const Token *condition, const Token *block) {
 }
 
 /* Creates an operation token */
-OperationToken *createOperationToken(const Token *first, const Token *second, const char *oper) {
+OperationToken *
+createOperationToken(const Token *first, const Token *second, const char *oper) {
   //First we allocate memory
-  OperationToken *token = malloc(sizeof(OperationToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+  OperationToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type     = OPERATION_TOKEN;
   token->first    = (Token *)first;
   token->second   = (Token *)second;
-  token->oper     = calloc(strlen(oper) + 1, sizeof(char));
-  if(token->oper == NULL) {
+  token->op       = calloc(strlen(oper) + 1, sizeof(char));
+  
+  if(!isValid(token->op)) {
     free(token);
     return NULL;
   }
-  strcpy(token->oper, oper);
+  
+  strcpy(token->op, oper);
   return token;
 }
 
+/* Creates a single operation token */
+SingleOperationToken *
+createSingleOperationToken(const Token *operand, const char *oper) {
+    //First we allocate memory
+    SingleOperationToken *token = malloc(sizeof *token);
+    if(!isValid(token)) return NULL;
+
+    token->type     = SINGLE_OPERATION_TOKEN;
+    token->operand  = (Token *)operand;
+    token->op       = calloc(3, sizeof(char)); /* 2 for the operation and 1 for the 0 */
+    
+    if(!isValid(token->op)) {
+      free(token);
+      return NULL;
+    }
+
+    strcpy(token->op, oper);
+    return token;
+}
+
 /* Creates a string token */
-StringToken *createStringToken(const char *string) {
+StringToken *
+createStringToken(const char *string) {
   //First we allocate memory
-  StringToken *token = malloc(sizeof(StringToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+  StringToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type   = STRING_TOKEN;
   token->string = calloc(strlen(string) + 1, sizeof(char));
-  if(token->string == NULL) {
+  
+  if(!isValid(token->string)) {
     free(token);
     return NULL;
   }
+  
   strcpy(token->string, string);
   return token;
 }
 
 /* Creates a constant token */
-ConstantToken *createConstantToken(const char *constant) {
+ConstantToken *
+createConstantToken(const char *constant) {
   //First we allocate memory
-  ConstantToken *token = malloc(sizeof(ConstantToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+  ConstantToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type     = CONSTANT_TOKEN;
   token->constant = calloc(strlen(constant) + 1, sizeof(char));
-  if(token->constant == NULL) {
+  
+  if(!isValid(token->constant)) {
     free(token);
     return NULL;
   }
+  
   strcpy(token->constant, constant);
   return token;
 }
 
 /* Creates a toker for a variable */
-VariableToken *createVariableToken(const char *var) {
-  VariableToken *token = malloc(sizeof(VariableToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+VariableToken *
+createVariableToken(const char *var) {
+  VariableToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type     = VARIABLE_TOKEN;
   token->stored   = NULL;
   token->declared = FALSE;
   token->name = calloc(strlen(var) + 1, sizeof(char));
-  if(token->name == NULL) {
+  
+  if(!isValid(token->name)) {
     free(token);
     return NULL;
   }
+  
   strcpy(token->name, var);
   return token;
 }
 
 /* Creates a condition token */
-ConditionToken *createConditionToken(const Token *first, const Token *second, const Token *third) {
-  ConditionToken *token = malloc(sizeof(ConditionToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+ConditionToken *
+createConditionToken(const Token *first, const Token *second, const Token *third) {
+  ConditionToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type   = CONDITION_TOKEN;
   token->first  = (Token *)first;
   token->second = (Token *)second;
@@ -180,48 +210,54 @@ ConditionToken *createConditionToken(const Token *first, const Token *second, co
 }
 
 /* Creates a return token */
-ReturnToken *createReturnToken(const Token *expression) {
-  ReturnToken *token = malloc(sizeof(ReturnToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+ReturnToken *
+createReturnToken(const Token *expression) {
+  ReturnToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type       = RETURN_TOKEN;
   token->expression = (Token *)expression;
   return token;
 }
 
 /* Creates an empty token */
-Token *createEmptyToken() {
-  Token *token = malloc(sizeof(Token));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+Token *
+createEmptyToken() {
+  Token *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type = NULL_TOKEN;
   return token;
 }
 
 /* Creates a negation token */
-NegationToken *createNegationToken(Token *expression) {
-  NegationToken *token = malloc(sizeof(NegationToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+NegationToken *
+createNegationToken(Token *expression) {
+  NegationToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type       = NEGATION_TOKEN;
   token->expression = expression;
   return token;
 }
 
 /* Creates a print token */
-PrintToken *createPrintToken(Token *expression) {
-  PrintToken *token = malloc(sizeof(PrintToken));
-  if (token == NULL) {
-    //TODO: Handle frees
-    return NULL;
-  }
+PrintToken *
+createPrintToken(Token *expression) {
+  PrintToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  
   token->type       = PRINT_TOKEN;
   token->expression = expression;
   return token;
+}
+
+/* Internal function for verifying the pointer returned by malloc/calloc */
+static int
+isValid(void *ptr) {
+    if (ptr == NULL) {
+        fprintf(stderr, "Error allocating heap space\n");
+        return 0;
+    }
+    return 1;
 }
