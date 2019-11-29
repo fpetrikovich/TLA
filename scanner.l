@@ -4,7 +4,6 @@
 
 digit		[0-9]
 decimal		-?{digito}+\.{digito}+
-integer 	-?{digito}+
 variable 	[a-zA-Z][a-zA-Z0-9]*
 coordinates \(-?[0-9]+,-?[0-9]+\)
 new_line 	\n
@@ -52,16 +51,15 @@ new_line 	\n
 ")"						return CLOSE_PARENTHESES;
 "begin"					return BEGIN;
 "end"					return END;
-"int"					return INTEGER;
-"double"				return DOUBLE;
+"int"					return NUMBER;
+//"double"				return DOUBLE;
 "coordinates"			return COORDINATES;
 "string"				return STRING;	
 "function"				return FUNCTION; //NO SE SI VA ESTA?
 
 
 /* to do --> involves yacc and idk that yet */
-{integer} 				{ strcpy(yyval.string, yytext); return INTEGER_VAL; }
-{decimal} 				{ strcpy(yyval.string, yytext); return DOUBLE_VAL; }
+{decimal} 				{ strcpy(yyval.string, yytext); return NUMBER_VAL; }
 {coordinates} 			{ strcpy(yyval.string, yytext); return STRING_VAL; }
 {variable} 				{ strcpy(yyval.string, yytext); return VARIABLE; }
 {new_line} 				{ yylineno++; return NEW_LINE; }

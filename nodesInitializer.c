@@ -6,11 +6,12 @@
 static void isValid(void *ptr);
 
 Node *
-node (NodeType type) {
+node (NodeType type, DataType data) {
     Node *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
 
     node->type = type;
+    node->data = data;
     return node;
 }
 
@@ -21,6 +22,7 @@ string(const char *string)
     if(!isValid(node)) return NULL;
 
     node->type   = TYPE_STRING;
+    node->data   = STRING;
     node->string = calloc(strlen(string) + 1, sizeof(char));
     if(!isValid(node->string)) return node;
     
@@ -29,12 +31,13 @@ string(const char *string)
 }
 
 ConstantNode *
-constant(const char *constant)
+constant(const char *constant, NodeType type)
 {
     ConstantNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
 
     node->type     = TYPE_CONSTANT;
+    node->data     = DATA_NUMBER;
     node->constant = calloc(strlen(constant) + 1, sizeof(char));
     if(!isValid(node->constant)) return node;
 
@@ -49,7 +52,7 @@ variable(const char *var, Node *nodeT)
     if (!isValid(node)) return NULL;
 
     node->type         = TYPE_VARIABLE;
-    node->declaredType = nodeT->type
+    node->data         = nodeT->data;
     node->stored       = NULL;
     node->declared     = FALSE;
     node->name         = calloc(strlen(var) + 1, sizeof(char));
@@ -61,16 +64,17 @@ variable(const char *var, Node *nodeT)
 
 OperationNode *
 operation(const Node *first, 
-          const char *oper, \
+          const char *oper, 
           const Node *second)
 {
     OperationNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
 
-    node->type   = TYPE_OPERATION;
-    node->first  = (Node *)first;
-    node->second = (Node *)second;
-    node->op     = calloc(strlen(oper) + 1, sizeof(char));
+    node->type     = TYPE_OPERATION;
+    node->data     = first->data;
+    node->first    = (Node *)first;
+    node->second   = (Node *)second;
+    node->op       = calloc(strlen(oper) + 1, sizeof(char));
     if(!isValid(node->op)) return node;
 
     strcpy(node->op, oper);
@@ -84,9 +88,10 @@ singleOperation(const Node *node,
     SingleOperationNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
 
-    node->type = TYPE_SINGLE_OPERATION;
-    node->node = (Node *)node;
-    node->op   = calloc(3, sizeof(char)); /* 2 for the operation and 1 for the 0 */
+    node->type     = TYPE_SINGLE_OPERATION;
+    node->data     = DATA_NUMBER;
+    node->node     = (Node *)node;
+    node->op       = calloc(3, sizeof(char)); /* 2 for the operation and 1 for the 0 */
     if(!isValid(node->op)) return node;
 
     strcpy(node->op, oper);
@@ -103,6 +108,7 @@ ifNode(const Node *ifN,
     IfNode *node    = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
     node->type      = TYPE_IF;
+    node->data      = NULL;
     node->ifNode    = (Node *)ifN;
     node->ifBlock   = (Node *)ifBlock;
     node->elifNode  = (Node *)elifN;
@@ -118,6 +124,7 @@ whileNode(const Node *condition, const Node *block)
     if(!isValid(node)) return NULL;
 
     node->type      = TYPE_WHILE;
+    node->data      = NULL;
     node->condition = (Node *)condition;
     node->block     = (Node *)block;
     return node;
@@ -129,6 +136,7 @@ instructionsList(const Node *node)
     ListNode *list = malloc(sizeof *list);
     if(!isValid(list)) return NULL;
     list->type = TYPE_INSTRUCTIONS;
+    node->data      = NULL;
     list->node = (Node *)node;
     list->next = NULL;
     return list;
@@ -156,6 +164,7 @@ returnNode(const Node *expression)
     if(!isValid(node)) return NULL;
  
     node->type       = TYPE_RETURN;
+    node->data       = NULL;
     node->expression = (Node *)expression;
     return node;
 }
@@ -166,6 +175,7 @@ block(const ListNode *instructions)
     BlockNode *node    = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
     node->type         = TYPE_BLOCK;
+    node->data         = NULL;
     node->instructions = (ListNode *)instructions;
     return node;
 }
@@ -176,6 +186,7 @@ empty(void)
     Node *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
     node->type = TYPE_NULL;
+    node->data = NULL;
     return node;
 }
 
@@ -186,6 +197,7 @@ instruction(Node *instruction)
     if(!isValid(node)) return NULL;
 
     node->type        = TYPE_INSTRUCTION;
+    node->data        = NULL;
     node->instruction = instruction;
     return node;
 }
@@ -196,6 +208,7 @@ negation(Node *expression)
     NegationNode *node = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
     node->type         = TYPE_NEGATION;
+    node->data         = DATA_NUMBER;     /* Negation works with numbers not strings */
     node->expression   = expression;
     return node;
 }
@@ -206,6 +219,7 @@ print(Node *expression)
     PrintNode *node  = malloc(sizeof *node);
     if(!isValid(node)) return NULL;
     node->type       = TYPE_PRINT;
+    node->data       = NULL;
     node->expression = expression;
     return node;
 }

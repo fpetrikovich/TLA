@@ -3,6 +3,7 @@
 
 typedef enum {  TYPE_NULL = 1,
                 TYPE_CONSTANT,
+                TYPE_STRING,
                 TYPE_OPERATION,
                 TYPE_SINGLE_OPERATION,
                 TYPE_CONDITIONAL,
@@ -16,20 +17,22 @@ typedef enum {  TYPE_NULL = 1,
                 TYPE_VARIABLE,
                 TYPE_INSTRUCTIONS,
                 TYPE_PRINT,
-                /* For declarations */
-                TYPE_INTEGER,
-                TYPE_DOUBLE,
-                TYPE_STRING,
-                TYPE_FUNCTION,
-                TYPE_COORDINATES
 } NodeType;
+
+typedef enum {  DATA_NUMBER,
+                DATA_STRING,
+                DATA_FUNCTION,
+                DATA_COORDINATES
+} DataType;
 
 typedef struct {
   NodeType type;
+  DataType data;
 } Node;
 
 typedef struct {
   NodeType type;
+  DataType data;
   Node *node;
   struct ListNode *next;
 } ListNode;
@@ -38,6 +41,7 @@ typedef struct {
  * elements and an operand between */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *first;
   Node *second;
   char *op;
@@ -46,6 +50,7 @@ typedef struct {
 /* For the X++ and X-- operations */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *node;
   char *op;
 } SingleOperationNode; 
@@ -53,19 +58,21 @@ typedef struct {
 /* Node for the return expression */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *expression;
 } ReturnNode;
 
 /* For numbers --> double and integer */
 typedef struct {
   NodeType type;
+  DataType data;
   char *constant;
 } ConstantNode;
 
 /* For manipulation of variables */
 typedef struct {
   NodeType type;
-  NodeType declaredType;
+  DataType data;
   int declared;
   char *name;
   Node *stored;
@@ -75,12 +82,14 @@ typedef struct {
 /* Node to print */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *expression;
 } PrintNode;
 
 /* To handle if / elif / else expressions */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *ifNode;
   Node *ifBlock;
   Node *elifNode;
@@ -91,6 +100,7 @@ typedef struct {
 /* For the calculate while loop */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *block;
   Node *condition;
 } CalculateWhileNode;
@@ -98,24 +108,28 @@ typedef struct {
 /* Generic block node */
 typedef struct {
   NodeType type;
+  DataType data;
   ListNode *instructions;
 } BlockNode;
 
 /* For the string data type */
 typedef struct {
   NodeType type;
+  DataType data;
   char *string;
 } StringNode;
 
 /* For a single instruction */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *instruction;
 } InstructionNode;
 
 /* For the NOT_OP expressions */
 typedef struct {
   NodeType type;
+  DataType data;
   Node *expression;
 } NegationNode;
 
