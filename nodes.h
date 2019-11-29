@@ -65,6 +65,7 @@ typedef struct {
 /* For manipulation of variables */
 typedef struct {
   NodeType type;
+  NodeType declaredType;
   int declared;
   char *name;
   Node *stored;

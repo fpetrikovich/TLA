@@ -43,15 +43,16 @@ constant(const char *constant)
 }
 
 VariableNode *
-variable(const char *var)
+variable(const char *var, Node *nodeT)
 {
     VariableNode *node = malloc(sizeof *node);
     if (!isValid(node)) return NULL;
 
-    node->type     = TYPE_VARIABLE;
-    node->stored   = NULL;
-    node->declared = FALSE;
-    node->name     = calloc(strlen(var) + 1, sizeof(char));
+    node->type         = TYPE_VARIABLE;
+    node->declaredType = nodeT->type
+    node->stored       = NULL;
+    node->declared     = FALSE;
+    node->name         = calloc(strlen(var) + 1, sizeof(char));
     if (!isValid(node->name)) return node;
 
     strcpy(node->name, var);

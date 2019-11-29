@@ -75,6 +75,35 @@ func_type:
 	| STRING  { $$ = node(TYPE_STRING); }
 	;
 
+statement:
+	  declaration SEMI_COLON
+	| assign_operation SEMI_COLON
+	| one_operation SEMI_COLON
+	| expression SEMI_COLON
+	;
+
+ declaration:
+ 	  type VARIABLE  		{ $$ = variable($2, $1); } 	
+ 	| type assign_operation 
+ 		{	// CHECK!!!!
+ 			$$ = variable((VariableNode *)(((OperationNode *)($2->node))->first)->name, $1);
+ 		}	
+ 	| function_declaration
+
+function_declaration:
+	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
+	;
+
+function_definition:
+	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
+	;
+
+function_value:
+	  function_value NEW_LINE
+	| function_value function_value
+	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
+	;
+
 instructions:
 	  BEGIN block END { *code = instructionList($2);   $$ = *code; }
 	| BEGIN END		  { *code = instructionList(NULL); $$ = *code; }
@@ -125,7 +154,7 @@ constant:
 	;
 
 variable:
-	VARIABLE  { $$ = variable($1); }
+	VARIABLE  { $$ = variable($1, NULL); }
 	;
 
 base_expression:
@@ -219,31 +248,6 @@ slope_block:
 	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
 	;
 
-statement:
-	  declaration SEMI_COLON
-	| assign_operation SEMI_COLON
-	| one_operation SEMI_COLON
-	| expression SEMI_COLON
-	;
-
- declaration:
- 	  type variable
- 	| function_declaration
-
-function_declaration:
-	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
-	;
-
-function_definition:
-	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
-	;
-
-function_value:
-	  function_value NEW_LINE
-	| function_value function_value
-	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
-	;
-
 %%
 //ACA VA LAS FUNCIONES QUE USAMOS EN PRODUCCIONES Y DEFINIMOS EN LA PRIMERA PARTE
 
@@ -256,5 +260,10 @@ yyerror(ListNode ** code, char *s) {
 
 int
 main(void) {
-
+	/* Initializing global variable structure */
+	variables = (variableStorage *)malloc(sizeof *variable);
+	if (variables == NULL) {
+		fprintf(stderr, "Unable to allocate memory for variables\n");
+		exit(EXIT_FAILURE);
+	}
 }
