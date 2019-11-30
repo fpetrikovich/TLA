@@ -52,15 +52,14 @@ new_line 	\n
 "begin"					return BEGIN;
 "end"					return END;
 "number"				return NUMBER;
-//"double"				return DOUBLE;
 "coordinates"			return COORDINATES;
 "string"				return STRING;	
 "function"				return FUNCTION; //NO SE SI VA ESTA?
 
 
 /* to do --> involves yacc and idk that yet */
-{decimal} 				{ strcpy(yyval.string, yytext); return NUMBER_VAL; }
-{coordinates} 			{ strcpy(yyval.string, yytext); return STRING_VAL; }
+{decimal} 				{ strcpy(yyval.string, yytext); return NUMBER; }
+{coordinates} 			{ strcpy(yyval.string, yytext); return STRING; }
 {variable} 				{ strcpy(yyval.string, yytext); return VARIABLE; }
 {new_line} 				{ yylineno++; return NEW_LINE; }
 .

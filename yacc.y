@@ -27,7 +27,7 @@ extern int yylineno;
 /* Which of the productions that follow 
  * in the middle section is going to be
  * my starting rule */
-%start instructions
+%start main
 
 %parse-param { TokenList ** code }
 
@@ -55,7 +55,8 @@ extern int yylineno;
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
-%type <string> VARIABLE STRING_VAL NUMBER_VAL constant variable
+%type <string> VARIABLE STRING_VAL NUMBER_VAL variable
+%type <string> FUNCTION COORDINATES NUMBER STRING
 %type <string> count_op assign_op relational_op logic_op one_op
 
 
@@ -64,12 +65,12 @@ extern int yylineno;
 
 type:
 	  func_type   { $$ = $1; }
-	| FUNCTION    { $$ = createToken(FUNCTION_TOKEN); }
-	| COORDINATES { $$ = createToken(COORDINATES_TOKEN); }
+	| FUNCTION    { $$ = createFunctionToken($1); check($$); } //TODO
+	| COORDINATES { $$ = createCoordinateToken($1); check($$); }
 /* types allowed in a function */
 func_type:
-	  NUMBER  { $$ = createToken(CONSTANT_TOKEN); }
-	| STRING  { $$ = createToken(CONSTANT_STRING); }
+	  NUMBER  { $$ = createConstantToken($1); check($$); }
+	| STRING  { $$ = createStringToken($1); check($$); }
 	;
 
 statement:
@@ -80,15 +81,14 @@ statement:
 	;
 
  declaration:
- 	  type VARIABLE  		{ $$ = createVariableToken($2, $1); } 	
- 	| type assign_operation 
- 		{	// CHECK!!!!
- 			$$ = createVariableToken((VariableToken *)(((OperationToken *)($2->current))->first)->name, $1);
- 		}	
+ 	  type VARIABLE  				 { $$ = createVariableToken($2, $1); check($$);} 	
+ 	| declaration ASSIGN expression  { $$ = createOperationToken($1, "=", $3); check($$); }
+ 	| declaration ASSIGN slope_block { $$ = createOperationToken($1, "=", $3); check($$); }
+ 	| declaration ASSIGN math_block  { $$ = createOperationToken($1, "=", $3); check($$); }	
  	| function_declaration
 
 function_declaration:
-	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
+	FUNCTION STRING OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
 	;
 
 function_definition:
@@ -101,69 +101,68 @@ function_value:
 	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
 	;
 
+main:
+	  BEGIN instructions END { *code = createStatementList($2); $$ = *code; check($$);}
+	| BEGIN END		  		 { *code = createEmptyToken(); $$ = *code; check($$); }
+
 instructions:
-	  BEGIN block END { *code = createStatementList($2);   $$ = *code; }
-	| BEGIN END		  { *code = createStatementList(NULL); $$ = *code; }
+	  block			      { $$ = createStatementList($1); check($$); }
+	| instructions block  { $$ = addStatement($2, $3); check($$); }
 	;
 
 block:
-	  braces 			{ $$ = createBlockToken($1); }
+	  braces 			{ $$ = createBlockToken($1); check($$); }
 	| if_block 			{ $$ = $1; }
 	| loop_block		{ $$ = $1; }
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
-	| statement 		{ $$ = createStatementToken($1); }
-	| NEW_LINE 			{ $$ = createEmptyToken(); }
+	| statement 		{ $$ = createStatementToken($1); check($$); }
+	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 
 braces:
-	  OPEN_BRACES CLOSE_BRACES				{ $$ = createStatementList(NULL); }
-	| OPEN_BRACES instructions CLOSE_BRACES { $$ = $2; }
+	  OPEN_BRACES CLOSE_BRACES				{ $$ = createStatementList(NULL); check($$); }
+	| OPEN_BRACES block CLOSE_BRACES { $$ = $2; }
 	;
 
 if_block:
 	  IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = createIfToken($3, $5, NULL, NULL, NULL); }
+	  	{ $$ = createIfToken($3, $5, NULL, NULL, NULL); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = createIfToken($3, $5, $8, $10, NULL); }
+	  	{ $$ = createIfToken($3, $5, $8, $10, NULL); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-	 	{ $$ = createIfToken($3, $5, $8, $10, $12); }
+	 	{ $$ = createIfToken($3, $5, $8, $10, $12); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-		{ $$ = createIfToken($3, $5, NULL, NULL, $7); }
+		{ $$ = createIfToken($3, $5, NULL, NULL, $7); check($$); }
 	;
 
 loop_block:
 	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON 
-		{ $$ = createCalculateWhileToken($5, $2); }
+		{ $$ = createCalculateWhileToken($5, $2); check($$); }
 	;
 
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = createPrintToken($3); }
+	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = createPrintToken($3); check($$); }
 	;
 
 return_block:
-	RETURN expression SEMI_COLON { $$ = createReturnToken($2); }
-	;
-
-constant:
-	NUMBER_VAL { $$ = createConstantToken($1); }
+	RETURN expression SEMI_COLON { $$ = createReturnToken($2); check($$); }
 	;
 
 variable:
-	VARIABLE  { $$ = createVariableToken($1, NULL); }
+	VARIABLE  { $$ = createVariableToken($1, NULL); check($$); }
 	;
 
 base_expression:
-	  constant   { $$ = $1; }
+	  func_type  { $$ = $1; }
 	| variable   { $$ = $1; }
-    | STRING_VAL { $$ = createStringToken($1); }
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
     ;
 
 simple_expression:
 	  base_expression				{ $$ = $1; }
-	| NOT_OP relational_operation 	{ $$ = createNegationToken($2); }
-	| NOT_OP logic_operation 		{ $$ = createNegationToken($2); }
+	| NOT_OP relational_operation 	{ $$ = createNegationToken($2); check($$); }
+	| NOT_OP logic_operation 		{ $$ = createNegationToken($2); check($$); }
 	;
 
 expression:
@@ -182,10 +181,7 @@ count_op:
 	;
 
 count_operation:
-	expression count_op expression { 
-		//matchingType(getType($1->current), getType($3->current));
-		$$ = createOperationToken($1, $2, $3); 
-	}
+	expression count_op expression { $$ = createOperationToken($1, $2, $3); check($$); }
 	;
 
 relational_op:
@@ -198,9 +194,7 @@ relational_op:
 	;
 
 relational_operation:
-	expression relational_op expression { 
-		$$ = createOperationToken($1, $2, $3); 
-	}
+	expression relational_op expression { $$ = createOperationToken($1, $2, $3); check($$); }
 	;
 
 logic_op:
@@ -209,9 +203,7 @@ logic_op:
 	;
 
 logic_operation:
-	expression logic_op expression  { 
-		$$ = createOperationToken($1, $2, $3); 
-	}
+	expression logic_op expression  { $$ = createOperationToken($1, $2, $3); check($$); }
 	;
 
 one_op:
@@ -220,9 +212,7 @@ one_op:
 	;
 
 one_operation:
-	variable one_op { 
-		$$ = createSingleOperationToken($1, $2); 
-	}
+	variable one_op { $$ = createSingleOperationToken($1, $2); check($$); }
 	;
 
 assign_op:
@@ -232,11 +222,11 @@ assign_op:
 	| ASSIGN_DIV		{ strcpy($$,"/="); }
 	| ASSIGN_MULTI		{ strcpy($$,"*="); }
 	;
-code
+
 assign_operation:
-	  variable assign_op expression  { $$ = createOperationToken($1, $2, $3); }
-	| variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); }
-	| variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); }
+	  variable assign_op expression  { $$ = createOperationToken($1, $2, $3); check($$); }
+	| variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); check($$); }
+	| variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); check($$); }
 
 
 math_block:
@@ -246,7 +236,10 @@ math_block:
 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
 
 math_condition:
-	NUMBER_VAL SEMI_COLON expression SEMI_COLON NUMBER_VAL
+	variable SEMI_COLON expression SEMI_COLON varible
+	NUMBER SEMI_COLON expression SEMI_COLON varible
+	variable SEMI_COLON expression SEMI_COLON NUMBER
+	NUMBER SEMI_COLON expression SEMI_COLON NUMBER	
 	;
 
 slope_block:
@@ -255,11 +248,30 @@ slope_block:
 
 %%
 
+
+
 void 
 yyerror(ListNode ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
 	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
-	exit(EXIT_FAILURE);
+	freeTokens();
+}
+
+void 
+check(Token * token) {
+	/* On error from malloc, token will be null */
+	if (token == NULL) yyerror(*code, "Error allocating memory");
+
+	/* Must check that the type is correct (NULL = error):
+	 * Operation and assignment must have matching types */
+	switch(token->type) {
+        case IF_TOKEN:
+        case WHILE_TOKEN:
+        	// Has no dataType field
+        	break;
+       	default:
+       	    if (token->dataType == NULL) yyerror(*code, "Incorrect type in assignment or operation");
+    }
 }
 
 void
@@ -277,4 +289,8 @@ main(void) {
 		fprintf(stderr, "Unable to allocate memory for variables\n");
 		exit(EXIT_FAILURE);
 	}
+	//yyparse
+	//translate to C
+	//printf
+
 }
