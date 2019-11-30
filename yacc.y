@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 #include "tokenFunctions.h"
-#include "codeGenerator.h"
 #include "translationTokens.h"
+#include "codeTranslator.h"
 
 /* What parser will call when 
  * there is a syntactical error */
@@ -21,7 +21,7 @@ VariableToken *variables[MAX_VARIABLES];
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	TokenType  
+	TokenType token; 
 	char 	  string[500];
 	Token     *token;
 	TokenList *list;
@@ -45,16 +45,16 @@ VariableToken *variables[MAX_VARIABLES];
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
 %token NUMBER NUMBER_VAL FUNCTION COORDINATES VARIABLE STRING STRING_VAL
-%token NEW_LINE ASSIGN_FUNC
+%token NEW_LINE 
 %token BEGIN END
 
 /* ---------------------------------------------
 
 /* Token will be saved in the member
  * in the union */
-%type <list> braces instructions
-%type <token> type func_type block if_block loop_block math_block slope_block
-%type <token> function_block print_block return_block 
+%type <list> braces instructions main
+%type <token> type func_type block if_block loop_block math_block slope_block declaration
+%type <token> print_block return_block statement
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
@@ -110,7 +110,7 @@ main:
 
 instructions:
 	  block			      { $$ = createStatementList($1); check($$); }
-	| instructions block  { $$ = addStatement($2, $3); check($$); }
+	| instructions block  { $$ = addStatement($1, $2); check($$); }
 	;
 
 block:
@@ -239,8 +239,8 @@ math_block:
 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
 
 math_condition:
-	variable SEMI_COLON expression SEMI_COLON varible
-	NUMBER SEMI_COLON expression SEMI_COLON varible
+	variable SEMI_COLON expression SEMI_COLON variable
+	NUMBER SEMI_COLON expression SEMI_COLON variable
 	variable SEMI_COLON expression SEMI_COLON NUMBER
 	NUMBER SEMI_COLON expression SEMI_COLON NUMBER	
 	;
@@ -293,8 +293,15 @@ main(void) {
 		exit(EXIT_FAILURE);
 	}
 	memset(variables, NULL, sizeof(VariableToken *) * MAX_VARIABLES);
-	//yyparse
-	//translate to C
-	//printf
+	
+	TokenList *code;
+	yyparse(&code);
+
+	printf("#include <stdio.h>\n");
+	printf("#include <stdlib.h>\n\n");
+	printf("int main(int argc, char const *argv[]) {\n");
+	printf("%s\n", generarCodigoC(programa));
+	printf("\nreturn 0;\n}");
+	return 0;
 
 }

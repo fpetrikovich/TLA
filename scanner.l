@@ -1,9 +1,12 @@
 %{
 #include "y.tab.h"
+#include "tokenFunctions.h"
+#include "translationTokens.h"
+#include "codeTranslator.h"
 %}
 
 digit		[0-9]
-decimal		-?{digito}+\.{digito}+
+decimal		-?{digit}+\.{digit}+
 variable 	[a-zA-Z][a-zA-Z0-9]*
 coordinates \(-?[0-9]+,-?[0-9]+\)
 new_line 	\n
@@ -56,11 +59,9 @@ new_line 	\n
 "string"				return STRING;	
 "function"				return FUNCTION; //NO SE SI VA ESTA?
 
-
-/* to do --> involves yacc and idk that yet */
-{decimal} 				{ strcpy(yyval.string, yytext); return NUMBER; }
-{coordinates} 			{ strcpy(yyval.string, yytext); return STRING; }
-{variable} 				{ strcpy(yyval.string, yytext); return VARIABLE; }
+{decimal} 				{ strcpy(yylval.string, yytext); return NUMBER; }
+{coordinates} 			{ strcpy(yylval.string, yytext); return STRING; }
+{variable} 				{ strcpy(yylval.string, yytext); return VARIABLE; }
 {new_line} 				{ yylineno++; return NEW_LINE; }
 .
 	
