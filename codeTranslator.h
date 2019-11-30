@@ -56,6 +56,6 @@ static char *
 process(Token *token);
 
 char *
-translateToC(Token *token);
+translateToC(TokenList *token);
 
 #endif
