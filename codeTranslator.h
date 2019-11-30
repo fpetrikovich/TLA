@@ -7,9 +7,11 @@
 
 extern VariableToken **variables;
 
+VariableToken *
+createOrFindVariable(const char *name);
 
 VariableToken *
-findVariable(const char *name);
+castVariable(VariableToken *variable, Token *token);
 
 char *
 stringTranslator(Token *token);

@@ -11,6 +11,7 @@
 /* What parser will call when 
  * there is a syntactical error */
 void yyerror(TokenList **list, char *s);
+void check(Token *token);
 
 /* Variable for the line count */
 extern int yylineno;
@@ -72,26 +73,26 @@ TokenList *code;
 
 type:
 	  func_type   { $$ = $1; }
-	// | FUNCTION    { $$ = createFunctionToken($1); check($$); } //TODO
-	// | COORDINATES { $$ = createCoordinateToken($1); check($$); }
+	// | FUNCTION    { $$ = (Token *)createFunctionToken($1); check($$); } //TODO
+	// | COORDINATES { $$ = (Token *)createCoordinateToken($1); check($$); }
 /* types allowed in a function */
 func_type:
-	  NUMBER  { $$ = createConstantToken($1); check($$); }
-	| STRING  { $$ = createStringToken($1); check($$); }
+	  NUMBER  { $$ = (Token *)createConstantToken($1); check($$); }
+	| STRING  { $$ = (Token *)createStringToken($1); check($$); }
 	;
 
 statement:
 	  declaration SEMI_COLON
-	| assign_operation SEMI_COLON
+	| assign_operation SEMI_COLONcast
 	| one_operation SEMI_COLON
 	| expression SEMI_COLON
 	;
 
  declaration:
- 	  type VARIABLE  				 { $$ = createOrFindVariable($2); check($$); $$ = castVariable($$, $1); check($$);} 	
- 	| declaration ASSIGN expression  { $$ = createOperationToken($1, "=", $3); check($$); }
- 	// | declaration ASSIGN slope_block { $$ = createOperationToken($1, "=", $3); check($$); }
- 	// | declaration ASSIGN math_block  { $$ = createOperationToken($1, "=", $3); check($$); }	
+ 	  type VARIABLE  				 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = (Token *)castVariable($$, $1); check($$);} 	
+ 	| declaration ASSIGN expression  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
+ 	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
+ 	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
  	// | function_declaration
 
 // function_declaration:
@@ -109,67 +110,67 @@ statement:
 // 	;
 
 main:
-	  START instructions END { *code = createStatementList($2); $$ = *code; check($$);}
-	| START END		  		 { *code = createEmptyToken(); $$ = *code; check($$); }
+	  START instructions END { *code = createStatementList($2); $$ = (Token *)*code; check($$);}
+	| START END		  		 { *code = createEmptyToken(); $$ = (Token *)*code; check($$); }
 
 instructions:
-	  block			      { $$ = createStatementList($1); check($$); }
-	| instructions block  { $$ = addStatement($1, $2); check($$); }
+	  block			      { $$ = (Token *)createStatementList($1); check($$); }
+	| instructions block  { $$ = (Token *)addStatement($1, $2); check($$); }
 	;
 
 block:
-	  braces 			{ $$ = createBlockToken($1); check($$); }
+	  braces 			{ $$ = (Token *)createBlockToken($1); check($$); }
 	| if_block 			{ $$ = $1; }
 	| loop_block		{ $$ = $1; }
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
-	| statement 		{ $$ = createStatementToken($1); check($$); }
-	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
+	| statement 		{ $$ = (Token *)createStatementToken($1); check($$); }
+	| NEW_LINE 			{ $$ = (Token *)createEmptyToken(); check($$); }
 	;
 
 braces:
-	  OPEN_BRACES CLOSE_BRACES				{ $$ = createStatementList(NULL); check($$); }
-	| OPEN_BRACES block CLOSE_BRACES { $$ = $2; }
+	  OPEN_BRACES CLOSE_BRACES				{ $$ = (Token *)createStatementList(NULL); check($$); }
+	| OPEN_BRACES block CLOSE_BRACES { $$ = (Token *)$2; }
 	;
 
 if_block:
 	  IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = createIfToken($3, $5, NULL, NULL, NULL); check($$); }
+	  	{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, NULL); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = createIfToken($3, $5, $8, $10, NULL); check($$); }
+	  	{ $$ = (Token *)createIfToken($3, $5, $8, $10, NULL); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-	 	{ $$ = createIfToken($3, $5, $8, $10, $12); check($$); }
+	 	{ $$ = (Token *)createIfToken($3, $5, $8, $10, $12); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-		{ $$ = createIfToken($3, $5, NULL, NULL, $7); check($$); }
+		{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, $7); check($$); }
 	;
 
 loop_block:
 	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON 
-		{ $$ = createCalculateWhileToken($5, $2); check($$); }
+		{ $$ = (Token *)createCalculateWhileToken($5, $2); check($$); }
 	;
 
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = createPrintToken($3); check($$); }
+	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = (Token *)createPrintToken($3); check($$); }
 	;
 
 return_block:
-	RETURN expression SEMI_COLON { $$ = createReturnToken($2); check($$); }
+	RETURN expression SEMI_COLON { $$ = (Token *)createReturnToken($2); check($$); }
 	;
 
 variable:
-	VARIABLE  { $$ = createOrFindVariable($1); check($$); }
+	VARIABLE  { $$ = (Token *)createOrFindVariable($1); check($$); }
 	;
 
 base_expression:
 	  func_type  { $$ = $1; }
 	| variable   { $$ = $1; }
-    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = (Token *)$2; }
     ;
 
 simple_expression:
 	  base_expression				{ $$ = $1; }
-	| NOT_OP relational_operation 	{ $$ = createNegationToken($2); check($$); }
-	| NOT_OP logic_operation 		{ $$ = createNegationToken($2); check($$); }
+	| NOT_OP relational_operation 	{ $$ = (Token *)createNegationToken($2); check($$); }
+	| NOT_OP logic_operation 		{ $$ = (Token *)createNegationToken($2); check($$); }
 	;
 
 expression:
@@ -188,7 +189,7 @@ count_op:
 	;
 
 count_operation:
-	expression count_op expression { $$ = createOperationToken($1, $2, $3); check($$); }
+	expression count_op expression { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	;
 
 relational_op:
@@ -201,7 +202,7 @@ relational_op:
 	;
 
 relational_operation:
-	expression relational_op expression { $$ = createOperationToken($1, $2, $3); check($$); }
+	expression relational_op expression { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	;
 
 logic_op:
@@ -210,7 +211,7 @@ logic_op:
 	;
 
 logic_operation:
-	expression logic_op expression  { $$ = createOperationToken($1, $2, $3); check($$); }
+	expression logic_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	;
 
 one_op:
@@ -219,7 +220,7 @@ one_op:
 	;
 
 one_operation:
-	variable one_op { $$ = createSingleOperationToken($1, $2); check($$); }
+	variable one_op { $$ = (Token *)createSingleOperationToken($1, $2); check($$); }
 	;
 
 assign_op:
@@ -231,9 +232,9 @@ assign_op:
 	;
 
 assign_operation:
-	  variable assign_op expression  { $$ = createOperationToken($1, $2, $3); check($$); }
-	// | variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); check($$); }
-	// | variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); check($$); }
+	  variable assign_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
+	// | variable assign_op math_block  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
+	// | variable assign_op slope_block { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 
 
 // math_block:
