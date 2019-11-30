@@ -1,6 +1,8 @@
 #ifndef TRANSLATION_TOKENS_H
 #define TRANSLATION_TOKENS_H
 
+#define MAX_VARIABLES 100
+
 /* Definition of token types for the translation to C program*/
 typedef enum {  NULL_TOKEN = 1,
                 OPERATION_TOKEN,
