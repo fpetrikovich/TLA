@@ -32,21 +32,21 @@ typedef enum {  DATA_NUMBER,
 /* Token structures that hold the token information */
 
 /* Basic token */
-typedef struct {
+typedef struct Token {
   TokenType   type;
   DataType    dataType;
 } Token;
 
 /* List of tokens */
-typedef struct {
-  TokenType   type;
-  DataType    dataType;
-  Token       *current;
-  TokenList   *next;
+typedef struct TokenList {
+  TokenType          type;
+  DataType           dataType;
+  Token              *current;
+  struct TokenList   *next;
 } TokenList;
 
 /* Token for operations */
-typedef struct {
+typedef struct OperationToken {
   TokenType type;     //OPERATION_TOKEN
   DataType  dataType; 
   Token     *first;   //What's left of the operator
@@ -55,7 +55,7 @@ typedef struct {
 } OperationToken;
 
 /* Token for singular operations like X++ */
-typedef struct {
+typedef struct SingleOperationToken {
   TokenType type;     //SINGLE_OPERATION_TOKEN
   DataType  dataType;
   Token     *operand; //What's being modified
@@ -63,7 +63,7 @@ typedef struct {
 } SingleOperationToken; 
 
 /* Token for a return statement */
-typedef struct {
+typedef struct ReturnToken {
   TokenType type;        //RETURN_TOKEN
   DataType  dataType;
   Token     *expression;  //Expression to return
@@ -71,14 +71,14 @@ typedef struct {
 
 /* Token for constant values */
 /* For numbers --> double and integer */
-typedef struct {
+typedef struct ConstantToken {
   TokenType type;     //CONSTANT_TOKEN
   DataType  dataType;
   char      *value;   //Constant value
 } ConstantToken;
 
 /* Token for handling variables */
-typedef struct {
+typedef struct VariableToken {
   TokenType type;     //VARIABLE_TOKEN
   DataType  dataType;
   int       declared; //Is it being declared or not?
@@ -88,14 +88,14 @@ typedef struct {
 } VariableToken;
 
 /* Token for printing */
-typedef struct {
+typedef struct PrintToken {
   TokenType type;         //PRINT_TOKEN
   DataType  dataType;
   Token     *expression;  //Expression to be printed
 } PrintToken;
 
 /* Token for if statement */
-typedef struct {
+typedef struct IfToken {
   TokenType type;           //IF_TOKEN
   DataType  dataType;
   Token     *ifCondition;   //Condition to be accepted
@@ -106,7 +106,7 @@ typedef struct {
 } IfToken;
 
 /* Token for a calculate while loop */
-typedef struct {
+typedef struct CalculateWhileToken {
   TokenType type;         //WHILE_TOKEN
   DataType  dataType;
   Token     *block;       //Block token with the statements to execute
@@ -114,34 +114,34 @@ typedef struct {
 } CalculateWhileToken;
 
 /* Token for a block of code */
-typedef struct {
+typedef struct BlockToken {
   TokenType   type;           //BLOCK_TOKEN
   DataType    dataType;
   TokenList   *statements;    //Statements
 } BlockToken;
 
 /* Token for a string */
-typedef struct {
+typedef struct StringToken {
   TokenType type;           //STRING_TOKEN
   DataType  dataType;
   char      *string;        //String value
 } StringToken;
 
 /* For a single statement */
-typedef struct {
+typedef struct StatementToken {
   TokenType type;           //STATEMENT_TOKEN
   DataType  dataType;
   Token     *statement;     //Token that's being stated
 } StatementToken;
 
 /* For the NOT_OP expressions */
-typedef struct {
+typedef struct NegationToken {
   TokenType type;              //NEGATION_TOKEN
   DataType  dataType;
   Token     *expression;        //Token of the expression being negated
 } NegationToken;
 
-typedef struct {
+typedef struct SummationToken {
   TokenType type;             //CONSTANT_TOKEN
   DataType  dataType;
   Token     *initNum;         //Token of the initial number
@@ -149,7 +149,7 @@ typedef struct {
   Token     *finalNum;        //Token of the final number
 } SummationToken;
 
-typedef struct {
+typedef struct ProductionToken {
   TokenType type;             //CONSTANT_TOKEN
   DataType  dataType;
   Token     *initNum;         //Token of the initial number

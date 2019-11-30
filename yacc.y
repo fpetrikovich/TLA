@@ -21,10 +21,9 @@ VariableToken *variables[MAX_VARIABLES];
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	TokenType token; 
 	char 	  string[500];
-	Token     *token;
-	TokenList *list;
+	struct Token     *token;
+	struct TokenList *list;
 }
 
 /* Which of the productions that follow 
@@ -32,7 +31,7 @@ VariableToken *variables[MAX_VARIABLES];
  * my starting rule */
 %start main
 
-%parse-param { TokenList ** code }
+%parse-param { struct TokenList ** code }
 
 /* ----------------- TOKENS ---------------------
  * Token that I'm expecting from the lexical 

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "tokenFunctions.h"
+#include "translationTokens.h"
 
 /* Creates a basic token */
 Token *

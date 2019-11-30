@@ -1,8 +1,5 @@
 %{
 #include "y.tab.h"
-#include "tokenFunctions.h"
-#include "translationTokens.h"
-#include "codeTranslator.h"
 %}
 
 digit		[0-9]
