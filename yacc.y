@@ -262,7 +262,7 @@ void
 yyerror(TokenList ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
 	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
-	freeTokens();
+	freeToken((Token *) code);
 }
 
 void 
@@ -300,6 +300,8 @@ main(void) {
 	printf("int main(int argc, char const *argv[]) {\n");
 	printf("%s\n", translateToC(code));
 	printf("\nreturn 0;\n}");
+
+	freeToken((Token *) code);
 	return 0;
 
 }
