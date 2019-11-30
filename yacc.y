@@ -5,6 +5,7 @@
 
 #include "tokenFunctions.h"
 #include "codeGenerator.h"
+#include "translationTokens.h"
 
 /* What parser will call when 
  * there is a syntactical error */
@@ -12,6 +13,8 @@ void yyerror(TokenList **list, char *s);
 
 /* Variable for the line count */
 extern int yylineno;
+
+VariableToken *variables[MAX_VARIABLES];
 
 %}
 
@@ -81,7 +84,7 @@ statement:
 	;
 
  declaration:
- 	  type VARIABLE  				 { $$ = createVariableToken($2, $1); check($$);} 	
+ 	  type VARIABLE  				 { $$ = createOrFindVariable($2); check($$); $$ = castVariable($$, $1); check($$);} 	
  	| declaration ASSIGN expression  { $$ = createOperationToken($1, "=", $3); check($$); }
  	| declaration ASSIGN slope_block { $$ = createOperationToken($1, "=", $3); check($$); }
  	| declaration ASSIGN math_block  { $$ = createOperationToken($1, "=", $3); check($$); }	
@@ -150,7 +153,7 @@ return_block:
 	;
 
 variable:
-	VARIABLE  { $$ = createVariableToken($1, NULL); check($$); }
+	VARIABLE  { $$ = createOrFindVariable($1); check($$); }
 	;
 
 base_expression:
@@ -283,12 +286,13 @@ matchingType(int type1, int type2) {
 
 int
 main(void) {
-	/* Initializing global variable structure */
-	variables = (variableStorage *)malloc(sizeof *variable);
+	variables = malloc(MAX_VARIABLES * sizeof(VariableToken *));
+
 	if (variables == NULL) {
-		fprintf(stderr, "Unable to allocate memory for variables\n");
+		printf("Unable to allocate space for the variables\n");
 		exit(EXIT_FAILURE);
 	}
+	memset(variables, NULL, sizeof(VariableToken *) * MAX_VARIABLES);
 	//yyparse
 	//translate to C
 	//printf

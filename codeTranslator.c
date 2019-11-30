@@ -1,19 +1,30 @@
 #include "codeTranslator.h"
+#include "tokenFunctions.h"
 #include <string.h>
 
-variableStorage *variables = NULL;
-static variableDefinida variables[MAX_VARIABLES];
 
-variableInfo *
-findVariable(const char *name) {
-	for (int i = 0; i < variables->amount; i++) {
-		if (strcmp(variables->list[i].name, name)) {
-			return &(variables->list[i]);
-		}
+
+VariableToken *
+createOrFindVariable(const char *name) {
+	for (int i = 0; variable[i] != NULL && i < MAX_VARIABLES; i++) {
+		if (strcmp(variables[i]->name, name)) {
+			return variables[i];
+		} 
 	}
-	printf("\"%s\" is not declared.\n", name);
-	exit(EXIT_FAILURE);
+  variables[i] = createVariableToken(name);
+  return variables[i];
 }
+
+VariableToken *
+castVariable(VariableToken *variable, Token *token) {
+  if(variable->dataType != DATA_NEW){
+    /* Already casted before --> redeclaration = error */
+    return NULL;
+  }
+  variable->dataType = token->dataType;
+  return variable;
+}
+
 
 /* Translator for string */
 char *
@@ -206,7 +217,7 @@ operationTranslator(Token *token) {
       	return NULL;
       }
       
-      if (variable->defined == 0) {
+      if (variable->definida == 0) {
         snprintf(buffer, bufferLenght, "char* ");
       }
 
@@ -221,7 +232,7 @@ operationTranslator(Token *token) {
       	return NULL;
       }
 
-      if (variable->defined == 0) {
+      if (variable->definida == 0) {
         snprintf(buffer, bufferLenght, "int ");
       }
       
