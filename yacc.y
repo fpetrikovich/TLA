@@ -286,4 +286,8 @@ main(void) {
 		fprintf(stderr, "Unable to allocate memory for variables\n");
 		exit(EXIT_FAILURE);
 	}
+
+	//Here we should call translateToC (remember to free it's return value after you are done using it)
+
+	//After everything is done we should free all the tokens generated on the yacc's actions
 }
