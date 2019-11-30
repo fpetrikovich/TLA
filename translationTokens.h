@@ -97,6 +97,7 @@ typedef struct {
 /* Token for if statement */
 typedef struct {
   TokenType type;           //IF_TOKEN
+  DataType  dataType;
   Token     *ifCondition;   //Condition to be accepted
   Token     *ifBlock;       //Token with the information of what to do if it passes
   Token     *elifCondition; //Other condition to be accepted
@@ -107,6 +108,7 @@ typedef struct {
 /* Token for a calculate while loop */
 typedef struct {
   TokenType type;         //WHILE_TOKEN
+  DataType  dataType;
   Token     *block;       //Block token with the statements to execute
   Token     *condition;   //Condition to continue looping
 } CalculateWhileToken;
