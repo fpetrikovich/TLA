@@ -72,6 +72,37 @@ createBlockToken(const TokenList *statements) {
   return token;
 }
 
+/* Creates a summation token with delimiters ( num1 and num2 could be variables, )*/
+SummationToken *
+createSummationToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
+  SummationToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+  if(initNum->dataType != DATA_NUMBER || finalNum->dataType != DATA_NUMBER){
+    token->dataType = NULL;
+  }
+  token->type           = SUMMATION_TOKEN;
+  token->initNum        = (Token *)initNum;
+  token->condition      = (Token *)condition;
+  token->finalNum       = (Token *)finalNum;
+  
+  return token;
+}
+
+ProductionToken *
+createProductionToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
+  ProductionToken *token = malloc(sizeof * token);
+  if(!isValid(token)) return NULL;
+  if(initNum->type != CONSTANT_TOKEN || finalNum  ->type != CONSTANT_TOKEN){
+    //RETURN NULL????
+  }
+  token->type           = PRODUCTION_TOKEN;
+  token->type           = SUMMATION_TOKEN;
+  token->initNum        = (Token *)initNum;
+  token->condition      = (Token *)condition;
+  token->finalNum       = (Token *)finalNum;
+  return token;
+}
+
 /* Creates an if token */
 IfToken *
 createIfToken(const Token *ifCondition, const Token *ifBlock, const Token *elifCondition, const Token *elifBlock, const Token *elseBlock) {
