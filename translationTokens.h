@@ -17,7 +17,9 @@ typedef enum {  NULL_TOKEN = 1,
                 FUNCTION_TOKEN,
                 COORDINATES_TOKEN,
                 VARIABLE_TOKEN,
-                BLOCK_TOKEN
+                BLOCK_TOKEN,
+                SUMMATION_TOKEN,
+                PRODUCTION_TOKEN
 } TokenType;
 
 typedef enum {  DATA_NUMBER,
@@ -134,5 +136,21 @@ typedef struct {
   DataType  dataType;
   Token     *expression;        //Token of the expression being negated
 } NegationToken;
+
+typedef struct {
+  TokenType type;             //CONSTANT_TOKEN
+  DataType  dataType;
+  Token     *initNum;         //Token of the initial number
+  Token     *condition;       //Token of the condition number
+  Token     *finalNum;        //Token of the final number
+} SummationToken;
+
+typedef struct {
+  TokenType type;             //CONSTANT_TOKEN
+  DataType  dataType;
+  Token     *initNum;         //Token of the initial number
+  Token     *condition;       //Token of the condition number
+  Token     *finalNum;        //Token of the final number
+} ProductionToken;
 
 #endif
