@@ -22,123 +22,102 @@ typedef enum {  NULL_TOKEN = 1,
                 BLOCK_TOKEN
 } TokenType;
 
-typedef enum {  DATA_NUMBER,
-                DATA_STRING,
-                DATA_FUNCTION,
-                DATA_COORDINATES
-} DataType;
-
-
 /* Token structures that hold the token information */
 
 /* Basic token */
 typedef struct {
   TokenType type;
-  DataType  data;
 } Token;
 
 /* List of tokens */
 typedef struct {
   TokenType  type;
-  DataType    data;
-  Token      *current;
-  TokenList  *next;
+  Token     *current;
+  TokenList *next;
 } TokenList;
 
 /* Token for operations */
 typedef struct {
   TokenType type;     //OPERATION_TOKEN
-  DataType  data;
-  Token     *first;   //What's left of the operator
-  Token     *second;  //What's right of the operator
-  char      *op;      //The operator symbol
+  Token    *first;   //What's left of the operator
+  Token    *second;  //What's right of the operator
+  char     *op;      //The operator symbol
 } OperationToken;
 
 /* Token for singular operations like X++ */
 typedef struct {
   TokenType type;     //SINGLE_OPERATION_TOKEN
-  DataType  data;
-  Token     *operand; //What's being modified
-  char      *op;      //The operator
+  Token    *operand; //What's being modified
+  char     *op;      //The operator
 } SingleOperationToken; 
 
 /* Token for a return statement */
 typedef struct {
   TokenType type;         //RETURN_TOKEN
-  DataType  data;
-  Token     *expression;  //Expression to return
+  Token    *expression;  //Expression to return
 } ReturnToken;
 
 /* Token for constant values */
 /* For numbers --> double and integer */
 typedef struct {
   TokenType type;     //CONSTANT_TOKEN
-  DataType  data;
-  char      *value;   //Constant value
+  char     *value;   //Constant value
 } ConstantToken;
 
 /* Token for handling variables */
 typedef struct {
   TokenType type;     //VARIABLE_TOKEN
-  DataType  data;
   int       declared; //Is it being declared or not?
-  char      *name;    //Name of the variable
-  Token     *stored;
-  char      *variable;
+  char     *name;    //Name of the variable
+  Token    *stored;
+  char     *variable;
 } VariableToken;
 
 /* Token for printing */
 typedef struct {
   TokenType type;         //PRINT_TOKEN
-  DataType  data;
-  Token     *expression;  //Expression to be printed
+  Token    *expression;  //Expression to be printed
 } PrintToken;
 
 /* Token for if statement */
 typedef struct {
   TokenType type;           //IF_TOKEN
-  DataType  data;
-  Token     *ifCondition;   //Condition to be accepted
-  Token     *ifBlock;       //Token with the information of what to do if it passes
-  Token     *elifCondition; //Other condition to be accepted
-  Token     *elifBlock;     //Token with the informatio of what to do if it passes
-  Token     *elseBlock;     //Token with the information of what to do if it fails
+  Token    *ifCondition;   //Condition to be accepted
+  Token    *ifBlock;       //Token with the information of what to do if it passes
+  Token    *elifCondition; //Other condition to be accepted
+  Token    *elifBlock;     //Token with the informatio of what to do if it passes
+  Token    *elseBlock;     //Token with the information of what to do if it fails
 } IfToken;
 
 /* Token for a calculate while loop */
 typedef struct {
   TokenType type;         //WHILE_TOKEN
-  DataType  data;
-  Token     *block;       //Block token with the statements to execute
-  Token     *condition;   //Condition to continue looping
+  Token    *block;       //Block token with the statements to execute
+  Token    *condition;   //Condition to continue looping
 } CalculateWhileToken;
 
 /* Token for a block of code */
 typedef struct {
-  TokenType type;           //BLOCK_TOKEN
-  DataType  data;
+  TokenType  type;           //BLOCK_TOKEN
   TokenList *statements;    //Statements
 } BlockToken;
 
 /* Token for a string */
 typedef struct {
   TokenType type;           //STRING_TOKEN
-  DataType  data;
-  char      *string;        //String value
+  char     *string;        //String value
 } StringToken;
 
 /* For a single statement */
 typedef struct {
   TokenType type;           //STATEMENT_TOKEN
-  DataType  data;
-  Token     *statement;     //Token that's being stated
+  Token    *statement;     //Token that's being stated
 } StatementToken;
 
 /* For the NOT_OP expressions */
 typedef struct {
-  TokenType type;           //NEGATION_TOKEN
-  DataType  data;
-  Token *expression;        //Token of the expression being negated
+  TokenType type;              //NEGATION_TOKEN
+  Token    *expression;        //Token of the expression being negated
 } NegationToken;
 
 #endif

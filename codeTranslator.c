@@ -18,7 +18,7 @@ findVariable(const char *name) {
 /* Translator for string */
 char *
 stringTranslator(Token *token) {
-  char *value = ((NodoCadena *)token)->string;
+  char *value = ((StringToken *)token)->string;
 
   const size_t bufferLenght = strlen(value) + 1;
   char *buffer = malloc(bufferLenght);

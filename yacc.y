@@ -64,12 +64,12 @@ extern int yylineno;
 
 type:
 	  func_type   { $$ = $1; }
-	| FUNCTION    { $$ = createToken(??, DATA_FUNCTION); }
-	| COORDINATES { $$ = createToken(??, DATA_COORDINATES); }
+	| FUNCTION    { $$ = createToken(FUNCTION_TOKEN); }
+	| COORDINATES { $$ = createToken(COORDINATES_TOKEN); }
 /* types allowed in a function */
 func_type:
-	  NUMBER  { $$ = createToken(CONSTANT_TOKEN, DATA_NUMBER); }
-	| STRING  { $$ = createToken(CONSTANT_STRING, DATA_STRING); }
+	  NUMBER  { $$ = createToken(CONSTANT_TOKEN); }
+	| STRING  { $$ = createToken(CONSTANT_STRING); }
 	;
 
 statement:
@@ -199,7 +199,6 @@ relational_op:
 
 relational_operation:
 	expression relational_op expression { 
-		//if (getType($1->current) != DATA_NUMBER || getType($3->current) != DATA_NUMBER) yyerror(*code, "Relational operations must involve numbers");
 		$$ = createOperationToken($1, $2, $3); 
 	}
 	;
@@ -211,7 +210,6 @@ logic_op:
 
 logic_operation:
 	expression logic_op expression  { 
-		//if (getType($1->current) != DATA_NUMBER || getType($3->current) != DATA_NUMBER) yyerror(*code, "Logic operations must involve numbers");
 		$$ = createOperationToken($1, $2, $3); 
 	}
 	;
@@ -223,7 +221,6 @@ one_op:
 
 one_operation:
 	variable one_op { 
-		//if (getType($1->current) != DATA_NUMBER) yyerror(*code, "Must only use ++ or -- with numbers");
 		$$ = createSingleOperationToken($1, $2); 
 	}
 	;
@@ -237,7 +234,7 @@ assign_op:
 	;
 code
 assign_operation:
-	  variable assign_op expression { $$ = createOperationToken($1, $2, $3);  }
+	  variable assign_op expression  { $$ = createOperationToken($1, $2, $3); }
 	| variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); }
 	| variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); }
 
@@ -263,12 +260,6 @@ yyerror(ListNode ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
 	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
 	exit(EXIT_FAILURE);
-}
-
-//TODO: do these validations go here??????????
-int
-getType(Token *token) {
-	return token->data;
 }
 
 void

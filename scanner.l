@@ -51,7 +51,7 @@ new_line 	\n
 ")"						return CLOSE_PARENTHESES;
 "begin"					return BEGIN;
 "end"					return END;
-"int"					return NUMBER;
+"number"				return NUMBER;
 //"double"				return DOUBLE;
 "coordinates"			return COORDINATES;
 "string"				return STRING;	
