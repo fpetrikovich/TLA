@@ -83,7 +83,7 @@ func_type:
 
 statement:
 	  declaration SEMI_COLON
-	| assign_operation SEMI_COLONcast
+	| assign_operation SEMI_COLON
 	| one_operation SEMI_COLON
 	| expression SEMI_COLON
 	;
