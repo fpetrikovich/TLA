@@ -46,14 +46,14 @@ VariableToken *variables[MAX_VARIABLES];
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
 %token NUMBER NUMBER_VAL FUNCTION COORDINATES VARIABLE STRING STRING_VAL
 %token NEW_LINE 
-%token BEGIN END
+%token START END
 
 /* ---------------------------------------------
 
 /* Token will be saved in the member
  * in the union */
 %type <list> braces instructions main
-%type <token> type func_type block if_block loop_block math_block slope_block declaration
+%type <token> type func_type block if_block loop_block /*math_block slope_block */declaration
 %type <token> print_block return_block statement
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
@@ -86,27 +86,27 @@ statement:
  declaration:
  	  type VARIABLE  				 { $$ = createOrFindVariable($2); check($$); $$ = castVariable($$, $1); check($$);} 	
  	| declaration ASSIGN expression  { $$ = createOperationToken($1, "=", $3); check($$); }
- 	| declaration ASSIGN slope_block { $$ = createOperationToken($1, "=", $3); check($$); }
- 	| declaration ASSIGN math_block  { $$ = createOperationToken($1, "=", $3); check($$); }	
- 	| function_declaration
+ 	// | declaration ASSIGN slope_block { $$ = createOperationToken($1, "=", $3); check($$); }
+ 	// | declaration ASSIGN math_block  { $$ = createOperationToken($1, "=", $3); check($$); }	
+ 	// | function_declaration
 
-function_declaration:
-	FUNCTION STRING OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
-	;
+// function_declaration:
+// 	FUNCTION STRING OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
+// 	;
 
-function_definition:
-	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
-	;
+// function_definition:
+// 	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
+// 	;
 
-function_value:
-	  function_value NEW_LINE
-	| function_value function_value
-	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
-	;
+// function_value:
+// 	  function_value NEW_LINE
+// 	| function_value function_value
+// 	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
+// 	;
 
 main:
-	  BEGIN instructions END { *code = createStatementList($2); $$ = *code; check($$);}
-	| BEGIN END		  		 { *code = createEmptyToken(); $$ = *code; check($$); }
+	  START instructions END { *code = createStatementList($2); $$ = *code; check($$);}
+	| START END		  		 { *code = createEmptyToken(); $$ = *code; check($$); }
 
 instructions:
 	  block			      { $$ = createStatementList($1); check($$); }
@@ -228,26 +228,26 @@ assign_op:
 
 assign_operation:
 	  variable assign_op expression  { $$ = createOperationToken($1, $2, $3); check($$); }
-	| variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); check($$); }
-	| variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); check($$); }
+	// | variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); check($$); }
+	// | variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); check($$); }
 
 
-math_block:
-	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
-	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
-	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
-	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+// math_block:
+// 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+// 	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+// 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+// 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
 
-math_condition:
-	variable SEMI_COLON expression SEMI_COLON variable
-	NUMBER SEMI_COLON expression SEMI_COLON variable
-	variable SEMI_COLON expression SEMI_COLON NUMBER
-	NUMBER SEMI_COLON expression SEMI_COLON NUMBER	
-	;
+// math_condition:
+// 	variable SEMI_COLON expression SEMI_COLON variable
+// 	NUMBER SEMI_COLON expression SEMI_COLON variable
+// 	variable SEMI_COLON expression SEMI_COLON NUMBER
+// 	NUMBER SEMI_COLON expression SEMI_COLON NUMBER	
+// 	;
 
-slope_block:
-	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
-	;
+// slope_block:
+// 	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
+// 	;
 
 %%
 
