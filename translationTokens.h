@@ -17,7 +17,7 @@ typedef enum {  NULL_TOKEN = 1,
                 INTEGER_TOKEN,
                 DOUBLE_TOKEN,
                 FUNCTION_TOKEN,
-                COORDINATEs_TOKEN,
+                COORDINATES_TOKEN,
                 VARIABLE_TOKEN,
                 BLOCK_TOKEN
 } TokenType;
@@ -117,7 +117,7 @@ typedef struct {
 typedef struct {
   TokenType type;           //BLOCK_TOKEN
   DataType  data;
-  ListToken *statements;    //Statements
+  TokenList *statements;    //Statements
 } BlockToken;
 
 /* Token for a string */
