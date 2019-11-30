@@ -93,13 +93,13 @@ createProductionToken(const Token *initNum,const Token * condition ,const Token 
   ProductionToken *token = malloc(sizeof * token);
   if(!isValid(token)) return NULL;
   if(initNum->type != CONSTANT_TOKEN || finalNum  ->type != CONSTANT_TOKEN){
-    //RETURN NULL????
+    token->dataType = NULL;
   }
   token->type           = PRODUCTION_TOKEN;
-  token->type           = SUMMATION_TOKEN;
   token->initNum        = (Token *)initNum;
   token->condition      = (Token *)condition;
   token->finalNum       = (Token *)finalNum;
+
   return token;
 }
 
@@ -314,6 +314,27 @@ createPrintToken(Token *expression) {
   token->expression = expression;
   return token;
 }
+
+void
+freeSummationToken(Token * token){
+  if(token != NULL) {
+    SummationToken *castedToken = (SummationToken *)token;
+    freeToken(castedToken->condition);
+    freeToken(castedToken->initNum);
+    freeToken(castedToken->finalNum);
+  }
+}
+
+void
+freeProductionToken(Token * token) {
+  if(token != NULL) {
+    ProductionToken *castedToken = (ProductionToken *)token;
+    freeToken(castedToken->condition);
+    freeToken(castedToken->initNum);
+    freeToken(castedToken->finalNum);
+  }
+}
+
 
 /* Internal function for verifying the pointer returned by malloc/calloc */
 static int
