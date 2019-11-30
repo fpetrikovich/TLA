@@ -322,6 +322,7 @@ freeSummationToken(Token * token){
     freeToken(castedToken->condition);
     freeToken(castedToken->initNum);
     freeToken(castedToken->finalNum);
+    free(token);
   }
 }
 
@@ -332,6 +333,7 @@ freeProductionToken(Token * token) {
     freeToken(castedToken->condition);
     freeToken(castedToken->initNum);
     freeToken(castedToken->finalNum);
+    free(token);
   }
 }
 
