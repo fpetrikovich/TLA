@@ -5,7 +5,7 @@
 
 #define MAX_VAR_NAME  50
 
-extern VariableToken *variables[MAX_VARIABLES];
+extern VariableToken **variables;
 
 
 VariableToken *

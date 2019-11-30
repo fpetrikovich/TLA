@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tokenFunctions.h"
 #include "translationTokens.h"
@@ -14,7 +15,11 @@ void yyerror(TokenList **list, char *s);
 /* Variable for the line count */
 extern int yylineno;
 
-VariableToken *variables[MAX_VARIABLES];
+int yylex();
+
+VariableToken **variables;
+
+TokenList *code;
 
 %}
 
@@ -67,8 +72,8 @@ VariableToken *variables[MAX_VARIABLES];
 
 type:
 	  func_type   { $$ = $1; }
-	| FUNCTION    { $$ = createFunctionToken($1); check($$); } //TODO
-	| COORDINATES { $$ = createCoordinateToken($1); check($$); }
+	// | FUNCTION    { $$ = createFunctionToken($1); check($$); } //TODO
+	// | COORDINATES { $$ = createCoordinateToken($1); check($$); }
 /* types allowed in a function */
 func_type:
 	  NUMBER  { $$ = createConstantToken($1); check($$); }
@@ -253,7 +258,7 @@ assign_operation:
 
 
 void 
-yyerror(ListNode ** code, char *s) {
+yyerror(TokenList ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
 	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
 	freeTokens();
@@ -262,7 +267,7 @@ yyerror(ListNode ** code, char *s) {
 void 
 check(Token * token) {
 	/* On error from malloc, token will be null */
-	if (token == NULL) yyerror(*code, "Error allocating memory");
+	if (token == NULL) yyerror(&code, "Error allocating memory");
 
 	/* Must check that the type is correct (NULL = error):
 	 * Operation and assignment must have matching types */
@@ -272,16 +277,10 @@ check(Token * token) {
         	// Has no dataType field
         	break;
        	default:
-       	    if (token->dataType == NULL) yyerror(*code, "Incorrect type in assignment or operation");
+       	    if (token->dataType == NULL) yyerror(&code, "Incorrect type in assignment or operation");
     }
 }
 
-void
-matchingType(int type1, int type2) {
-	if (type1 != type2) {
-		yyerror(*code, "Declaration and definition types do not match.\n");
-	}
-}
 
 int
 main(void) {
@@ -293,7 +292,6 @@ main(void) {
 	}
 	memset(variables, NULL, sizeof(VariableToken *) * MAX_VARIABLES);
 	
-	TokenList *code;
 	yyparse(&code);
 
 	printf("#include <stdio.h>\n");
