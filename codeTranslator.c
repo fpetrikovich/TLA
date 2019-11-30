@@ -206,7 +206,7 @@ operationTranslator(Token *token) {
       	return NULL;
       }
       
-      if (variable->definida == 0) {
+      if (variable->defined == 0) {
         snprintf(buffer, bufferLenght, "char* ");
       }
 
@@ -221,7 +221,7 @@ operationTranslator(Token *token) {
       	return NULL;
       }
 
-      if (variable->definida == 0) {
+      if (variable->defined == 0) {
         snprintf(buffer, bufferLenght, "int ");
       }
       
