@@ -300,7 +300,7 @@ main(void) {
 	printf("#include <stdio.h>\n");
 	printf("#include <stdlib.h>\n\n");
 	printf("int main(int argc, char const *argv[]) {\n");
-	printf("%s\n", generarCodigoC(programa));
+	printf("%s\n", translateToC(code));
 	printf("\nreturn 0;\n}");
 	return 0;
 
