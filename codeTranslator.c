@@ -324,12 +324,6 @@ printTranslator(Token *token) {
   }
   char *printfParameter;
 
-  char *p = malloc(strlen(expression) * sizeof(char));
-  if(p == NULL) {
-  	free(expression);
-  	return NULL;
-  }
-  strcpy(p, expression);
 
   if(castedToken->dataType == DATA_STRING) {
     printfParameter = "%s";
@@ -338,21 +332,18 @@ printTranslator(Token *token) {
   } else {
     //Unsupported
     free(expression);
-    free(p);
     return NULL;
   }
 
-  const size_t bufferLength = strlen(expression) + strlen("printf('XX', );\n") + 1;
+  const size_t bufferLength = strlen(expression) + strlen("printf('XX', )\n") + 1;
   char *buffer = calloc(bufferLength, sizeof(char));
   if(buffer == NULL) {
-  	free(p);
   	free(expression);
   	return NULL;
   }
 
-  snprintf(buffer, bufferLength, "printf(\"%s\", %s);\n", printfParameter, expression);
+  snprintf(buffer, bufferLength, "\nprintf(\"%s\", %s)\n", printfParameter, expression);
 
-  free(p);
   free(expression);
 
   return buffer;
