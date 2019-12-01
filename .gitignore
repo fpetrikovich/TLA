@@ -31,3 +31,8 @@
 # files that each contributor keeps in their folders that are not part of the project
 y.tab.c
 y.tab.h
+lex.yy.c
+out
+input
+test
+output.c

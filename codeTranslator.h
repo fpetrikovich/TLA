@@ -1,26 +1,17 @@
-#include "translationTokens.h"
-
 #ifndef CODE_TRANSLATOR_H
 #define CODE_TRANSLATOR_H
 
-#define MAX_VARIABLES 100
+#include "translationTokens.h"
+
 #define MAX_VAR_NAME  50
 
-extern variableStorage *variables;
-
-typedef struct {
-	TokenType type;			  /*Declared data type */
-	char name[MAX_VAR_NAME];  /* Variable name */
-	char defined;			  /* Variable was defined or not */
-} variableInfo;
-
-typedef struct {
-	variableInfo list[MAX_VARIABLES];
-	int amount;
-} variableStorage;
+extern VariableToken **variables;
 
 VariableToken *
-findVariable(const char *name);
+createOrFindVariable(const char *name);
+
+Token *
+castVariable(Token *variable, Token *token);
 
 char *
 stringTranslator(Token *token);

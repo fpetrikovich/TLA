@@ -1,24 +1,38 @@
 #include "codeTranslator.h"
+#include "tokenFunctions.h"
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-variableStorage *variables = NULL;
-static variableDefinida variables[MAX_VARIABLES];
 
-variableInfo *
-findVariable(const char *name) {
-	for (int i = 0; i < variables->amount; i++) {
-		if (strcmp(variables->list[i].name, name)) {
-			return &(variables->list[i]);
-		}
+
+VariableToken *
+createOrFindVariable(const char *name) {
+  int i;
+	for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
+		if (strcmp(variables[i]->name, name)) {
+			return variables[i];
+		} 
 	}
-	printf("\"%s\" is not declared.\n", name);
-	exit(EXIT_FAILURE);
+  variables[i] = createVariableToken(name);
+  return variables[i];
 }
+
+Token *
+castVariable(Token *variable, Token *token) {
+  if(variable->dataType != DATA_NEW){
+    /* Already casted before --> redeclaration = error */
+    return NULL;
+  }
+  variable->dataType = token->dataType;
+  return variable;
+}
+
 
 /* Translator for string */
 char *
 stringTranslator(Token *token) {
-  char *value = ((NodoCadena *)token)->string;
+  char *value = ((StringToken *)token)->string;
 
   const size_t bufferLenght = strlen(value) + 1;
   char *buffer = malloc(bufferLenght);
@@ -33,7 +47,7 @@ stringTranslator(Token *token) {
 /* Tramslator for constant */
 char *
 constantTranslator(Token *token) {
-  char *value = ((ConstantToken *)token)->value;
+  char *value = ((ConstantToken *)token)->constant;
   char *buffer = malloc(strlen(value) + 1);
   if(buffer == NULL) {
   	return NULL;
@@ -45,13 +59,33 @@ constantTranslator(Token *token) {
 /* Translator for variable token */
 char *
 variableTranslator(Token *token) {
-  char *name = ((VariableToken *)token)->name;
-  char *newVariable = calloc(strlen(name) + strlen("_") + 1, sizeof(char));
-  if(newVariable == NULL) {
-  	return NULL;
+  printf("IN VARIABLE_TRANSLATOR\n");
+  VariableToken *variable = (VariableToken *)token;
+  char *name = variable->name;
+  int length = 0;
+  char *dataType;
+
+  if (variable->declared == 0) {
+    if (variable->dataType == STRING_TOKEN) {
+      length += strlen("char *");
+      dataType = "char *";
+    } else {
+      length += strlen("int ");
+      dataType = "int ";
+    }
   }
-  strcpy(newVariable, name);
-  strcat(newVariable, "_");
+  length += strlen(name) + strlen("_") + 1;
+
+  char *newVariable = calloc(length, sizeof(char));
+  if(newVariable == NULL) {
+    return NULL;
+  }
+  if (variable->declared == 0){
+    variable->declared = 1;
+    snprintf(newVariable, length, "%s%s_", dataType, name);
+  } else {
+    snprintf(newVariable, length, "%s_", name);
+  }
 
   return newVariable;
 }
@@ -61,12 +95,15 @@ char *
 ifTranslator(Token *token) {
   IfToken *castedToken = (IfToken *)token;
 
+  //Declaration
+  char *ifCondition, *ifBlock, *elifCondition, *elifBlock, *elseBlock;
+
   //Translate parts of the if to C
-  char *ifCondition = process(castedToken->ifCondition);
+  ifCondition = process(castedToken->ifCondition);
   if(ifCondition == NULL) {
   	return NULL;
   }
-  char *ifBlock = process(castedToken->ifBlock);
+  ifBlock = process(castedToken->ifBlock);
   if(ifBlock == NULL) {
   	free(ifCondition);
   	return NULL;
@@ -74,14 +111,14 @@ ifTranslator(Token *token) {
 
   //Now the following three parts are optional, so they could be missing
   if(castedToken->elifCondition != NULL && castedToken->elifBlock != NULL) {
-  	char *elifCondition = process(castedToken->elifCondition);
+  	elifCondition = process(castedToken->elifCondition);
   	if(elifCondition == NULL) {
   		free(ifCondition);
   		free(ifBlock);
   		return NULL;
   	}
 
-  	char *elifBlock = process(castedToken->elifBlock);
+  	elifBlock = process(castedToken->elifBlock);
   	if (elifBlock == NULL) {
   		free(ifCondition);
   		free(ifBlock);
@@ -191,10 +228,10 @@ operationTranslator(Token *token) {
 
   if (castedToken->first->type == VARIABLE_TOKEN && strcmp(castedToken->op, "=") == 0 || strcmp(castedToken->op, "+=") == 0 || strcmp(castedToken->op, "-=") == 0 || strcmp(castedToken->op, "/=") == 0 || strcmp(castedToken->op, "*=") == 0) {
     //We find the variable its refering to, if it doesn't exist we just create it
-    variableInfo *variable = findVariable(((VariableToken *)castedToken->first)->name);
+    VariableToken *variable = createOrFindVariable(((VariableToken *)castedToken->first)->name);
 
-    VariableToken *castedFirstToken 	= (VariableToken *)castedToken->first;
-    VariableToken *castedSecondToken 	= (VariableToken *)castedToken->second;
+    VariableToken *castedFirstToken  = (VariableToken *)castedToken->first;
+    VariableToken *castedSecondToken = (VariableToken *)castedToken->second;
 
     if ((castedToken->second->type == STRING_TOKEN || (castedToken->second->type == VARIABLE_TOKEN && castedSecondToken->stored != NULL && castedSecondToken->stored->type == STRING_TOKEN))) {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("char* ") + 4;
@@ -206,11 +243,11 @@ operationTranslator(Token *token) {
       	return NULL;
       }
       
-      if (variable->definida == 0) {
+      if (variable->declared == 0) {
         snprintf(buffer, bufferLenght, "char* ");
+        variable->declared = 1;
       }
 
-      variable->type = STRING_TOKEN;
     } else {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("int ") + 4;
       
@@ -221,11 +258,10 @@ operationTranslator(Token *token) {
       	return NULL;
       }
 
-      if (variable->definida == 0) {
+      if (variable->declared == 0) {
         snprintf(buffer, bufferLenght, "int ");
+        variable->declared = 1;
       }
-      
-      variable->type = CONSTANT_TOKEN;
     }
 
     //We add to buffer
@@ -234,7 +270,7 @@ operationTranslator(Token *token) {
     strcat(buffer, op);
     strcat(buffer, " ");
     strcat(buffer, second);
-    strcat(buffer, ";");
+    if (strcmp(castedToken->op, "=") != 0) strcat(buffer, ";");
 
     //We free what's uneeded
     free(first);
@@ -262,7 +298,8 @@ operationTranslator(Token *token) {
 /* Translator for block token */
 char *
 blockTranslator(Token *token) {
-  return process(token->statements);
+  BlockToken *castedToken = (BlockToken *)token;
+  return process((Token *) castedToken->statements);
 }
 
 /* Translator for empty token */
@@ -339,7 +376,7 @@ printTranslator(Token *token) {
   }
   strcpy(p, expression);
 
-  variableInfo *variable = findVariable(p);
+  VariableToken *variable = createOrFindVariable(p);
 
   if (variable->type == STRING_TOKEN)
     printfParameter = "%s";
@@ -401,6 +438,7 @@ calculateWhileTranslator(Token *token) {
 /* Translator for statement token */
 char *
 statementTranslator(Token *token) {
+  printf("IN STATEMENT_TRANSLATOR\n");
 	//We only call this function if we know the type, so we can safely cast it
   StatementToken *castedToken = (StatementToken *)token;
 
@@ -412,7 +450,7 @@ statementTranslator(Token *token) {
   }
 
   //Aside from the lenght of the statement we need space for the new line and the NULL
-  const size_t bufferLenght = strlen(statement) + strlen("\n") + 1;
+  const size_t bufferLenght = strlen(statement) + strlen(";\n") + 1;
   //We create an initial buffer to save our translated code to
   char *buffer 							= malloc(bufferLenght);
   if(buffer == NULL) {
@@ -420,7 +458,7 @@ statementTranslator(Token *token) {
   	return NULL;
   }
   //We copy to buffer
-  snprintf(buffer, bufferLenght, "%s\n", statement);
+  snprintf(buffer, bufferLenght, "%s;\n", statement);
 
   //We no longer need the statement string so we free it
   free(statement);
@@ -463,6 +501,7 @@ statementListTranslator(Token *token) {
     char *newBuffer = realloc(buffer, strlen(newCode) + strlen(buffer) + 1);
     if (newBuffer == NULL) {
     	//TODO: See how to best manange this errors
+      free(newCode);
     	free(buffer);
     	return NULL;
     }
@@ -528,8 +567,6 @@ process(Token *token) {
   	case CONSTANT_TOKEN:
   		returnValue = constantTranslator(token);
   		break;
-  	case INTEGER_TOKEN:
-  	case DOUBLE_TOKEN:
   	case FUNCTION_TOKEN:
   	case COORDINATES_TOKEN:
   		//TODO
@@ -540,7 +577,6 @@ process(Token *token) {
   	case BLOCK_TOKEN:
   		returnValue = blockTranslator(token);
   		break;
-  	default:
   }
   //Return the translation of the token
   return returnValue;

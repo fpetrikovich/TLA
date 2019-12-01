@@ -39,8 +39,8 @@ createCalculateWhileToken	(const Token *condition,
 /* Creation function for an operation token */
 OperationToken *
 createOperationToken		(const Token *first,
-							 const Token *second,
-							 const char *oper);
+							 const char *oper,
+							 const Token *second);
 
 /* Creation function for a single operation token */
 SingleOperationToken *
@@ -57,7 +57,7 @@ createConstantToken 		(const char *constant);
 
 /* Creation function for a variable token */
 VariableToken *
-createVariableToken 		(const char *var, const Token *tokenT);
+createVariableToken 		(const char *var);
 
 /* Creation function for a return token */
 ReturnToken *
@@ -74,5 +74,28 @@ createNegationToken 		(Token *expression);
 /* Creation function for a print token */
 PrintToken *
 createPrintToken 			(Token *expression);
+
+/* Free's a token */
+void
+freeToken					(Token *token);
+
+void
+freeStatementList(Token *token);
+
+void
+freeBlockToken(Token *token);
+
+void
+freeSummationToken(Token * token);
+
+void
+freeProductionToken(Token * token);
+
+void
+freeIfToken(Token *token);
+
+void
+freeCalculateWhileToken(Token *token);
+
 
 #endif

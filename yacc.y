@@ -1,35 +1,43 @@
 %{
-
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tokenFunctions.h"
-#include "codeGenerator.h"
+#include "translationTokens.h"
+#include "codeTranslator.h"
 
 /* What parser will call when 
  * there is a syntactical error */
 void yyerror(TokenList **list, char *s);
+void check(Token *token);
 
 /* Variable for the line count */
 extern int yylineno;
+
+int yylex();
+
+VariableToken **variables;
+
+TokenList *code;
 
 %}
 
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	TokenType  
-	char 	  string[500];
-	Token     *token;
-	TokenList *list;
+	char 	  		  string[500];
+	struct Token     *token;
+	struct TokenList *list;
 }
 
 /* Which of the productions that follow 
  * in the middle section is going to be
  * my starting rule */
-%start instructions
+%start main
 
-%parse-param { TokenList ** code }
+%parse-param { struct TokenList ** code }
 
 /* ----------------- TOKENS ---------------------
  * Token that I'm expecting from the lexical 
@@ -41,129 +49,126 @@ extern int yylineno;
 %token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
-%token NUMBER NUMBER_VAL FUNCTION COORDINATES VARIABLE STRING STRING_VAL
-%token NEW_LINE ASSIGN_FUNC
-%token BEGIN END
+%token NUMBER FUNCTION COORDINATES VAR STRING 
+%token NEW_LINE 
+%token START END
 
 /* ---------------------------------------------
 
 /* Token will be saved in the member
  * in the union */
-%type <list> braces instructions
-%type <token> type func_type block if_block loop_block math_block slope_block
-%type <token> function_block print_block return_block 
+%type <list> instructions main
+%type <token> type func_type block if_block loop_block /*math_block slope_block */declaration
+%type <token> print_block return_block statement variable braces
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
-%type <string> VARIABLE STRING_VAL NUMBER_VAL constant variable
+%type <string> FUNCTION COORDINATES NUMBER STRING VAR
 %type <string> count_op assign_op relational_op logic_op one_op
-
-
 
 %%
 
 type:
 	  func_type   { $$ = $1; }
-	| FUNCTION    { $$ = createToken(??, DATA_FUNCTION); }
-	| COORDINATES { $$ = createToken(??, DATA_COORDINATES); }
+	// | FUNCTION    { $$ = (Token *)createFunctionToken($1); check($$); } //TODO
+	// | COORDINATES { $$ = (Token *)createCoordinateToken($1); check($$); }
 /* types allowed in a function */
 func_type:
-	  NUMBER  { $$ = createToken(CONSTANT_TOKEN, DATA_NUMBER); }
-	| STRING  { $$ = createToken(CONSTANT_STRING, DATA_STRING); }
+	  NUMBER  { $$ = (Token *)createConstantToken($1); check($$); }
+	| STRING  { $$ = (Token *)createStringToken($1); check($$); }
 	;
 
 statement:
-	  declaration SEMI_COLON
-	| assign_operation SEMI_COLON
-	| one_operation SEMI_COLON
-	| expression SEMI_COLON
+	  declaration SEMI_COLON		{ $$ = $1; }
+	| assign_operation SEMI_COLON   { $$ = $1; }
+	| one_operation SEMI_COLON      { $$ = $1; }
+	| expression SEMI_COLON         { $$ = $1; }
+	| print_block SEMI_COLON 		{ $$ = $1; }
 	;
 
  declaration:
- 	  type VARIABLE  		{ $$ = createVariableToken($2, $1); } 	
- 	| type assign_operation 
- 		{	// CHECK!!!!
- 			$$ = createVariableToken((VariableToken *)(((OperationToken *)($2->current))->first)->name, $1);
- 		}	
- 	| function_declaration
+ 	  type VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, $1); check($$);} 	
+ 	| declaration ASSIGN expression  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
+ 	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
+ 	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
+ 	// | function_declaration
 
-function_declaration:
-	FUNCTION STRING_VAL OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
-	;
+// function_declaration:
+// 	FUNCTION STRING OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
+// 	;
 
-function_definition:
-	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
-	;
+// function_definition:
+// 	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
+// 	;
 
-function_value:
-	  function_value NEW_LINE
-	| function_value function_value
-	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
-	;
+// function_value:
+// 	  function_value NEW_LINE
+// 	| function_value function_value
+// 	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
+// 	;
+
+main:
+	  START instructions END { *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
+	| START END		  		 { *code = NULL; $$ = *code; }
 
 instructions:
-	  BEGIN block END { *code = createStatementList($2);   $$ = *code; }
-	| BEGIN END		  { *code = createStatementList(NULL); $$ = *code; }
+	  block			      { $$ = createStatementList($1); check((Token *)$$); }
+	| instructions block  { $$ = addStatement($1, $2); check((Token *)$$); }
 	;
 
 block:
-	  braces 			{ $$ = createBlockToken($1); }
+	  braces 			{ $$ = (Token *)createBlockToken((TokenList *) $1); check($$); }
 	| if_block 			{ $$ = $1; }
 	| loop_block		{ $$ = $1; }
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
-	| statement 		{ $$ = createStatementToken($1); }
-	| NEW_LINE 			{ $$ = createEmptyToken(); }
+	| statement 		{ $$ = (Token *)createStatementToken($1); check($$); }
+	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 
 braces:
-	  OPEN_BRACES CLOSE_BRACES				{ $$ = createStatementList(NULL); }
-	| OPEN_BRACES instructions CLOSE_BRACES { $$ = $2; }
+	  OPEN_BRACES CLOSE_BRACES				{ $$ = NULL; }
+	| OPEN_BRACES block CLOSE_BRACES 		{ $$ = (Token *)$2; }
 	;
 
 if_block:
 	  IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = createIfToken($3, $5, NULL, NULL, NULL); }
+	  	{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, NULL); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
-	  	{ $$ = createIfToken($3, $5, $8, $10, NULL); }
+	  	{ $$ = (Token *)createIfToken($3, $5, $8, $10, NULL); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-	 	{ $$ = createIfToken($3, $5, $8, $10, $12); }
+	 	{ $$ = (Token *)createIfToken($3, $5, $8, $10, $12); check($$); }
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
-		{ $$ = createIfToken($3, $5, NULL, NULL, $7); }
+		{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, $7); check($$); }
 	;
 
 loop_block:
 	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON 
-		{ $$ = createCalculateWhileToken($5, $2); }
+		{ $$ = (Token *)createCalculateWhileToken($5, $2); check($$); }
 	;
 
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = createPrintToken($3); }
+	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = (Token *)createPrintToken($3); check($$); }
 	;
 
 return_block:
-	RETURN expression SEMI_COLON { $$ = createReturnToken($2); }
-	;
-
-constant:
-	NUMBER_VAL { $$ = createConstantToken($1); }
+	RETURN expression SEMI_COLON { $$ = (Token *)createReturnToken($2); check($$); }
 	;
 
 variable:
-	VARIABLE  { $$ = createVariableToken($1, NULL); }
+	VAR  { $$ = (Token *)createOrFindVariable($1); check($$); }
 	;
 
 base_expression:
-	  constant   { $$ = $1; }
+	  func_type  { $$ = $1; }
 	| variable   { $$ = $1; }
-    | STRING_VAL { $$ = createStringToken($1); }
-    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = (Token *)$2; }
     ;
 
 simple_expression:
 	  base_expression				{ $$ = $1; }
-	| NOT_OP relational_operation 	{ $$ = createNegationToken($2); }
-	| NOT_OP logic_operation 		{ $$ = createNegationToken($2); }
+	| NOT_OP relational_operation 	{ $$ = (Token *)createNegationToken($2); check($$); }
+	| NOT_OP logic_operation 		{ $$ = (Token *)createNegationToken($2); check($$); }
 	;
 
 expression:
@@ -182,10 +187,7 @@ count_op:
 	;
 
 count_operation:
-	expression count_op expression { 
-		//matchingType(getType($1->current), getType($3->current));
-		$$ = createOperationToken($1, $2, $3); 
-	}
+	expression count_op expression { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	;
 
 relational_op:
@@ -198,10 +200,7 @@ relational_op:
 	;
 
 relational_operation:
-	expression relational_op expression { 
-		//if (getType($1->current) != DATA_NUMBER || getType($3->current) != DATA_NUMBER) yyerror(*code, "Relational operations must involve numbers");
-		$$ = createOperationToken($1, $2, $3); 
-	}
+	expression relational_op expression { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	;
 
 logic_op:
@@ -210,10 +209,7 @@ logic_op:
 	;
 
 logic_operation:
-	expression logic_op expression  { 
-		//if (getType($1->current) != DATA_NUMBER || getType($3->current) != DATA_NUMBER) yyerror(*code, "Logic operations must involve numbers");
-		$$ = createOperationToken($1, $2, $3); 
-	}
+	expression logic_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	;
 
 one_op:
@@ -222,10 +218,7 @@ one_op:
 	;
 
 one_operation:
-	variable one_op { 
-		//if (getType($1->current) != DATA_NUMBER) yyerror(*code, "Must only use ++ or -- with numbers");
-		$$ = createSingleOperationToken($1, $2); 
-	}
+	variable one_op { $$ = (Token *)createSingleOperationToken($1, $2); check($$); }
 	;
 
 assign_op:
@@ -235,59 +228,80 @@ assign_op:
 	| ASSIGN_DIV		{ strcpy($$,"/="); }
 	| ASSIGN_MULTI		{ strcpy($$,"*="); }
 	;
-code
+
 assign_operation:
-	  variable assign_op expression { $$ = createOperationToken($1, $2, $3);  }
-	| variable assign_op math_block  { $$ = createOperationToken($1, $2, $3); }
-	| variable assign_op slope_block { $$ = createOperationToken($1, $2, $3); }
+	  variable assign_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
+	// | variable assign_op math_block  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
+	// | variable assign_op slope_block { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 
 
-math_block:
-	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
-	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
-	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
-	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+// math_block:
+// 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+// 	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+// 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+// 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
 
-math_condition:
-	NUMBER_VAL SEMI_COLON expression SEMI_COLON NUMBER_VAL
-	;
+// math_condition:
+// 	variable SEMI_COLON expression SEMI_COLON variable
+// 	NUMBER SEMI_COLON expression SEMI_COLON variable
+// 	variable SEMI_COLON expression SEMI_COLON NUMBER
+// 	NUMBER SEMI_COLON expression SEMI_COLON NUMBER	
+// 	;
 
-slope_block:
-	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
-	;
+// slope_block:
+// 	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
+// 	;
 
 %%
 
+
+
 void 
-yyerror(ListNode ** code, char *s) {
+yyerror(TokenList ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
 	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
-	exit(EXIT_FAILURE);
+	freeToken((Token *) code);
 }
 
-//TODO: do these validations go here??????????
-int
-getType(Token *token) {
-	return token->data;
+void 
+check(Token * token) {
+	/* On error from malloc, token will be null */
+	if (token == NULL) yyerror(&code, "Error allocating memory");
+
+	/* Must check that the type is correct (NULL = error):
+	 * Operation and assignment must have matching types */
+	switch(token->type) {
+        case IF_TOKEN:
+        case WHILE_TOKEN:
+        	// Has no dataType field
+        	break;
+       	default:
+       	    if (token->dataType == DATA_NULL) yyerror(&code, "Incorrect type in assignment or operation");
+    }
 }
 
-void
-matchingType(int type1, int type2) {
-	if (type1 != type2) {
-		yyerror(*code, "Declaration and definition types do not match.\n");
-	}
-}
 
 int
 main(void) {
-	/* Initializing global variable structure */
-	variables = (variableStorage *)malloc(sizeof *variable);
+	variables = malloc(MAX_VARIABLES * sizeof(VariableToken *));
+
 	if (variables == NULL) {
-		fprintf(stderr, "Unable to allocate memory for variables\n");
+		printf("Unable to allocate space for the variables\n");
 		exit(EXIT_FAILURE);
 	}
+	memset(variables, '\0', sizeof(VariableToken *) * MAX_VARIABLES);
+	
+	yyparse(&code);
 
-	//Here we should call translateToC (remember to free it's return value after you are done using it)
+	printf("#include <stdio.h>\n");
+	printf("#include <stdlib.h>\n\n");
+	printf("int main(int argc, char const *argv[]) {\n");
+	char * translation = translateToC((Token *)code);
+	printf("%s\n", translation);
+	printf("\nreturn 0;\n}");
 
-	//After everything is done we should free all the tokens generated on the yacc's actions
+	free(translation);
+
+	freeToken((Token *) code);
+	return 0;
 }
