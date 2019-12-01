@@ -78,11 +78,12 @@ TokenList *code;
 	//| STRING_TYPE  { $$ = (Token *)createStringToken($1); check($$); }
 
 statement:
-	  declaration SEMI_COLON		{ $$ = $1; }
-	| assign_operation SEMI_COLON   { $$ = $1; }
-	| one_operation SEMI_COLON      { $$ = $1; }
-	| expression SEMI_COLON         { $$ = $1; }
-	| print_block SEMI_COLON 		{ $$ = $1; }
+	  declaration SEMI_COLON		{ $$ = (Token *)createStatementToken($1); check($$); }
+	| assign_operation SEMI_COLON   { $$ = (Token *)createStatementToken($1); check($$); }
+	| one_operation SEMI_COLON      { $$ = (Token *)createStatementToken($1); check($$); }
+	| expression SEMI_COLON         { $$ = (Token *)createStatementToken($1); check($$); }
+	| print_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
+	| return_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
 
 declaration:
  	  NUMBER_TYPE VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_NUMBER); check($$);}
@@ -116,12 +117,11 @@ instructions:
 	;
 
 block:
-	  braces 			{ $$ = (Token *)createBlockToken((TokenList *) $1); check($$); }
-	| if_block 			{ $$ = $1; }
-	| loop_block		{ $$ = $1; }
-	| print_block		{ $$ = $1; }
-	| return_block		{ $$ = $1; }
-	| statement 		{ $$ = (Token *)createStatementToken($1); check($$); }
+	  braces 			{ $$ = $1; }		//Check this action
+	| if_block 			{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
+	| loop_block		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
+	| statement 		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }				//Check this action
+	| block block 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} }
 //	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 
@@ -159,7 +159,7 @@ print_block:
 	;
 
 return_block:
-	RETURN expression SEMI_COLON { $$ = (Token *)createReturnToken($2); check($$); }
+	RETURN expression { $$ = (Token *)createReturnToken($2); check($$); }
 	;
 
 variable:
