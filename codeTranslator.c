@@ -5,12 +5,11 @@
 #include <stdio.h>
 
 
-
 VariableToken *
 createOrFindVariable(const char *name) {
   int i;
 	for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
-		if (strcmp(variables[i]->name, name)) {
+		if (strcmp(variables[i]->name, name) == 0) {
 			return variables[i];
 		} 
 	}
@@ -22,7 +21,8 @@ Token *
 castVariable(Token *variable, Token *token) {
   if(variable->dataType != DATA_NEW){
     /* Already casted before --> redeclaration = error */
-    return NULL;
+    variable->dataType = DATA_NULL;
+    return variable;
   }
   variable->dataType = token->dataType;
   return variable;
@@ -103,7 +103,6 @@ ifTranslator(Token *token) {
   if(ifCondition == NULL) {
   	return NULL;
   }
-  ifBlock = process(castedToken->ifBlock);
   if(ifBlock == NULL) {
   	free(ifCondition);
   	return NULL;
@@ -242,12 +241,6 @@ operationTranslator(Token *token) {
       	free(second);
       	return NULL;
       }
-      
-      if (variable->declared == 0) {
-        snprintf(buffer, bufferLenght, "char* ");
-        variable->declared = 1;
-      }
-
     } else {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("int ") + 4;
       
@@ -256,11 +249,6 @@ operationTranslator(Token *token) {
       	free(first);
       	free(second);
       	return NULL;
-      }
-
-      if (variable->declared == 0) {
-        snprintf(buffer, bufferLenght, "int ");
-        variable->declared = 1;
       }
     }
 

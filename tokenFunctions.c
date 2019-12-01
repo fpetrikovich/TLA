@@ -246,12 +246,8 @@ createOperationToken(const Token *first,const char *oper,const Token *second) {
 
   //We have two possible data types, we make sure they match
   if(first->dataType != second->dataType) {
-    //If it doesn't match it could be an assignment for a new variable
-    if(first->dataType == DATA_NEW && strcmp(oper, "=") == 0) {
-      token->dataType = second->dataType;
-    } else {
+      // Set the dataType as invalid
       token->dataType = DATA_NULL;
-    }
   } else {
     //If they match, the only operation permited to string is assignment
     if(first->dataType == DATA_STRING && strcmp(oper, "=") != 0) {

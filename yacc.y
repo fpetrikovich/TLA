@@ -259,8 +259,9 @@ assign_operation:
 void 
 yyerror(TokenList ** code, char *s) {
 	fprintf(stderr, "%s\n", s);
-	printf("-------------\n%s in line %d\n-------------\n", s, yylineno);
+	printf("-------------------------------------\n%s in line %d\n-------------------------------------\n", s, yylineno);
 	freeToken((Token *) code);
+	exit(EXIT_FAILURE);
 }
 
 void 
