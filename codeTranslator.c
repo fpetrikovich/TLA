@@ -18,13 +18,13 @@ createOrFindVariable(const char *name) {
 }
 
 Token *
-castVariable(Token *variable, Token *token) {
+castVariable(Token *variable, DataType dataType) {
   if(variable->dataType != DATA_NEW){
     /* Already casted before --> redeclaration = error */
     variable->dataType = DATA_NULL;
     return variable;
   }
-  variable->dataType = token->dataType;
+  variable->dataType = dataType;
   return variable;
 }
 
@@ -350,12 +350,16 @@ printTranslator(Token *token) {
   }
   strcpy(p, expression);
 
-  VariableToken *variable = createOrFindVariable(p);
-
-  if (variable->type == STRING_TOKEN)
+  if(castedToken->dataType == DATA_STRING) {
     printfParameter = "%s";
-  else
+  } else if(castedToken->dataType == DATA_NUMBER) {
     printfParameter = "%d";
+  } else {
+    //Unsupported
+    free(expression);
+    free(p);
+    return NULL;
+  }
 
   const size_t bufferLength = strlen(expression) + strlen("printf('XX', );\n") + 1;
   char *buffer = calloc(bufferLength, sizeof(char));

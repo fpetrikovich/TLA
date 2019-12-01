@@ -49,7 +49,7 @@ TokenList *code;
 %token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
-%token NUMBER FUNCTION COORDINATES VAR STRING 
+%token NUMBER_LITERAL NUMBER_TYPE FUNCTION COORDINATES VAR STRING_LITERAL STRING_TYPE
 %token NEW_LINE 
 %token START END
 
@@ -58,25 +58,24 @@ TokenList *code;
 /* Token will be saved in the member
  * in the union */
 %type <list> instructions main
-%type <token> type func_type block if_block loop_block /*math_block slope_block */declaration
+%type <token> block if_block loop_block declaration /*math_block slope_block */
 %type <token> print_block return_block statement variable braces
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
-%type <string> FUNCTION COORDINATES NUMBER STRING VAR
+%type <string> FUNCTION COORDINATES NUMBER_LITERAL NUMBER_TYPE STRING_LITERAL VAR STRING_TYPE
 %type <string> count_op assign_op relational_op logic_op one_op
 
 %%
 
-type:
-	  func_type   { $$ = $1; }
+//type:
+	//  func_type   { $$ = $1; }
 	// | FUNCTION    { $$ = (Token *)createFunctionToken($1); check($$); } //TODO
 	// | COORDINATES { $$ = (Token *)createCoordinateToken($1); check($$); }
 /* types allowed in a function */
-func_type:
-	  NUMBER  { $$ = (Token *)createConstantToken($1); check($$); }
-	| STRING  { $$ = (Token *)createStringToken($1); check($$); }
-	;
+//func_type:
+	//  NUMBER_TYPE  { $$ = (Token *)createConstantToken($1); check($$); }
+	//| STRING_TYPE  { $$ = (Token *)createStringToken($1); check($$); }
 
 statement:
 	  declaration SEMI_COLON		{ $$ = $1; }
@@ -84,11 +83,11 @@ statement:
 	| one_operation SEMI_COLON      { $$ = $1; }
 	| expression SEMI_COLON         { $$ = $1; }
 	| print_block SEMI_COLON 		{ $$ = $1; }
-	;
 
- declaration:
- 	  type VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, $1); check($$);} 	
- 	| declaration ASSIGN expression  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
+declaration:
+ 	  NUMBER_TYPE VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_NUMBER); check($$);}
+ 	|  STRING_TYPE VAR 					 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_STRING); check($$);} 	
+ 	| declaration ASSIGN expression  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
  	// | function_declaration
@@ -108,11 +107,11 @@ statement:
 // 	;
 
 main:
-	  START instructions END { *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
-	| START END		  		 { *code = NULL; $$ = *code; }
+	  START instructions END 	{ *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
+	| START END	  		 		{ *code = NULL; $$ = *code; }
 
 instructions:
-	  block			      { $$ = createStatementList($1); check((Token *)$$); }
+	  block			      { $$ = addStatement($$, $1); check((Token *)$$); }
 	| instructions block  { $$ = addStatement($1, $2); check((Token *)$$); }
 	;
 
@@ -160,7 +159,8 @@ variable:
 	;
 
 base_expression:
-	  func_type  { $$ = $1; }
+	  NUMBER_LITERAL  { $$ = (Token *) createConstantToken($1); check($$); }
+	| STRING_LITERAL  { $$ = (Token *) createStringToken($1); check($$);}
 	| variable   { $$ = $1; }
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = (Token *)$2; }
     ;
@@ -267,17 +267,23 @@ yyerror(TokenList ** code, char *s) {
 void 
 check(Token * token) {
 	/* On error from malloc, token will be null */
-	if (token == NULL) yyerror(&code, "Error allocating memory");
+	if (token == NULL) {
+		yyerror(&code, "Error allocating memory");
+	}
 
 	/* Must check that the type is correct (NULL = error):
 	 * Operation and assignment must have matching types */
 	switch(token->type) {
         case IF_TOKEN:
         case WHILE_TOKEN:
+        case NULL_TOKEN:
         	// Has no dataType field
         	break;
        	default:
-       	    if (token->dataType == DATA_NULL) yyerror(&code, "Incorrect type in assignment or operation");
+       	    if (token->dataType == DATA_NULL) {
+       	    	yyerror(&code, "Incorrect type in assignment or operation");
+       	    }
+       	    break;
     }
 }
 

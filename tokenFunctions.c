@@ -69,6 +69,7 @@ addStatement(const TokenList *list, const Token *statement) {
   currentToken->next = createStatementList(statement);
   if(!isValid(currentToken->next)) {
     //TODO: Free the previous elements of the list
+    freeToken((Token *)list);
     return NULL;
   }
 
@@ -478,7 +479,7 @@ createPrintToken(Token *expression) {
   if(!isValid(token)) return NULL;
   
   token->type       = PRINT_TOKEN;
-  if(expression->dataType == DATA_STRING) {
+  if(expression->dataType == DATA_STRING || expression->dataType == DATA_NUMBER) {
     token->dataType = expression->dataType;
   } else {
     token->dataType = DATA_NULL;
@@ -546,6 +547,8 @@ freeToken(Token *token) {
       case BLOCK_TOKEN:
         freeBlockToken(token);
         break;
+      default:
+        print("Something went wrong, this token has no valid type");
     }
   }
 }

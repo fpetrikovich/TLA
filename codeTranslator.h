@@ -11,7 +11,7 @@ VariableToken *
 createOrFindVariable(const char *name);
 
 Token *
-castVariable(Token *variable, Token *token);
+castVariable(Token *variable, DataType dataType);
 
 char *
 stringTranslator(Token *token);

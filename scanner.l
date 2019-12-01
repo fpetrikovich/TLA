@@ -4,6 +4,7 @@
 
 digit		[0-9]
 number		-?{digit}+
+string_reg 	\"[^\"]*\"
 variable 	[a-zA-Z][a-zA-Z0-9]*
 coordinates \(-?[0-9]+,-?[0-9]+\)
 new_line 	\n
@@ -17,9 +18,9 @@ new_line 	\n
 "calculate"				return DO;
 "while"					return WHILE;
 "print"					return PRINT;
-"number"				return NUMBER;
+"number"				return NUMBER_TYPE;
 "coordinates"			return COORDINATES;
-"string"				return STRING;	
+"string"				return STRING_TYPE;	
 "function"				return FUNCTION; //NO SE SI VA ESTA?
 "+="					return ASSIGN_SUM;
 "*="					return ASSIGN_MULTI;
@@ -55,12 +56,14 @@ new_line 	\n
 "}"						return CLOSE_BRACES;
 "("						return OPEN_PARENTHESES;
 ")"						return CLOSE_PARENTHESES;
+[ \t\r]+				;		//Ignore white space
 
 
-{number} 				{ strcpy(yylval.string, yytext); return NUMBER; }
-{coordinates} 			{ strcpy(yylval.string, yytext); return STRING; }
+{number} 				{ strcpy(yylval.string, yytext); return NUMBER_LITERAL; }
+{coordinates} 			{ strcpy(yylval.string, yytext); return COORDINATES; }
 {variable} 				{ strcpy(yylval.string, yytext); return VAR;    }
-{new_line} 				{ yylineno++; return NEW_LINE; }
+{string_reg}			{ strcpy(yylval.string, yytext); return STRING_LITERAL; }
+{new_line} 				{ yylineno++; return NEW_LINE; }		//Do we even use new line? should we just ignore it?
 .						;
 	
 %%
