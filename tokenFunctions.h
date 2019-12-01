@@ -6,7 +6,17 @@
 #define FALSE 0
 #define TRUE !FALSE
 
+#define MAX_VAR_NAME  50
+
+extern VariableToken **variables;
+
 /* Creation function for a statement token */
+VariableToken *
+createOrFindVariable(const char *name);
+
+Token *
+castVariable(Token *variable, DataType dataType);
+
 StatementToken *
 createStatementToken		(Token *statement);
 
@@ -97,5 +107,7 @@ freeIfToken(Token *token);
 void
 freeCalculateWhileToken(Token *token);
 
+void
+freeVariables(void);
 
 #endif

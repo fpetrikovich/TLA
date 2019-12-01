@@ -86,8 +86,6 @@ typedef struct VariableToken {
   DataType  dataType;
   int       declared; //Is it being declared or not?
   char      *name;    //Name of the variable
-  Token     *stored;
-  char      *variable;
 } VariableToken;
 
 /* Token for printing */

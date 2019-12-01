@@ -308,7 +308,7 @@ main(void) {
 	printf("\nreturn 0;\n}");
 
 	free(translation);
-
 	freeToken((Token *) code);
+	freeVariables();
 	return 0;
 }

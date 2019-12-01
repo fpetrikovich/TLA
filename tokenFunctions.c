@@ -15,6 +15,30 @@ isValid(void *ptr) {
     return 1;
 }
 
+
+VariableToken *
+createOrFindVariable(const char *name) {
+  int i;
+  for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
+    if (strcmp(variables[i]->name, name) == 0) {
+      return variables[i];
+    } 
+  }
+  variables[i] = createVariableToken(name);
+  return variables[i];
+}
+
+Token *
+castVariable(Token *variable, DataType dataType) {
+  if(variable->dataType != DATA_NEW){
+    /* Already casted before --> redeclaration = error */
+    variable->dataType = DATA_NULL;
+    return variable;
+  }
+  variable->dataType = dataType;
+  return variable;
+}
+
 /* Creates a basic token */
 Token *
 createToken(TokenType type, DataType dataType) {
@@ -386,7 +410,6 @@ createVariableToken(const char *var) {
   
   token->type     = VARIABLE_TOKEN;
   token->dataType = DATA_NEW;
-  token->stored   = NULL;
   token->declared = 0;
   token->name     = calloc(strlen(var) + 1, sizeof(char));
   
@@ -401,13 +424,11 @@ createVariableToken(const char *var) {
 
 /* Free variable token */
 void
-freeVariableToken(Token *token) {
+freeVariableToken(VariableToken *token) {
   if(token != NULL) {
-    VariableToken *castedToken = (VariableToken *)token;
     //TODO: Fix this!!!!
-    //free(castedToken->name);
-    //free(castedToken->variable);
-    //free(token);
+    free(token->name);
+    free(token);
   }
 }
 
@@ -544,7 +565,7 @@ freeToken(Token *token) {
         //TODO
         break;
       case VARIABLE_TOKEN:
-        freeVariableToken(token);
+        //Will be done in the main;
         break;
       case BLOCK_TOKEN:
         freeBlockToken(token);
@@ -553,4 +574,13 @@ freeToken(Token *token) {
         printf("Something went wrong, this token has no valid type\n");
     }
   }
+}
+
+// VARIABLES FREE
+void
+freeVariables(void) {
+  for (int i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
+    freeVariableToken(variables[i]);
+  }
+  free(variables);
 }

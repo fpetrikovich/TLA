@@ -5,30 +5,6 @@
 #include <stdio.h>
 
 
-VariableToken *
-createOrFindVariable(const char *name) {
-  int i;
-	for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
-		if (strcmp(variables[i]->name, name) == 0) {
-			return variables[i];
-		} 
-	}
-  variables[i] = createVariableToken(name);
-  return variables[i];
-}
-
-Token *
-castVariable(Token *variable, DataType dataType) {
-  if(variable->dataType != DATA_NEW){
-    /* Already casted before --> redeclaration = error */
-    variable->dataType = DATA_NULL;
-    return variable;
-  }
-  variable->dataType = dataType;
-  return variable;
-}
-
-
 /* Translator for string */
 char *
 stringTranslator(Token *token) {

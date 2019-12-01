@@ -1,17 +1,8 @@
 #ifndef CODE_TRANSLATOR_H
 #define CODE_TRANSLATOR_H
 
-#include "translationTokens.h"
+#include "tokenFunctions.h"
 
-#define MAX_VAR_NAME  50
-
-extern VariableToken **variables;
-
-VariableToken *
-createOrFindVariable(const char *name);
-
-Token *
-castVariable(Token *variable, DataType dataType);
 
 char *
 stringTranslator(Token *token);
