@@ -210,8 +210,8 @@ operationTranslator(Token *token) {
     //We find the variable its refering to, if it doesn't exist we just create it
     VariableToken *variable = createOrFindVariable(((VariableToken *)castedToken->first)->name);
 
-    VariableToken *castedFirstToken  = castedToken->first;
-    VariableToken *castedSecondToken = castedToken->second;
+    VariableToken *castedFirstToken  = (VariableToken *)castedToken->first;
+    VariableToken *castedSecondToken = (VariableToken *)castedToken->second;
 
     if ((castedToken->second->type == STRING_TOKEN || (castedToken->second->type == VARIABLE_TOKEN && castedSecondToken->stored != NULL && castedSecondToken->stored->type == STRING_TOKEN))) {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("char* ") + 4;
