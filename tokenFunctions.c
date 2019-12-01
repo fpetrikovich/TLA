@@ -47,12 +47,14 @@ createToken(TokenType type, DataType dataType) {
 
     token->basicInfo.type     = type;
     token->basicInfo.dataType = dataType;
+    printf("Creating basic token: %d\n", token);
     return token;
 }
 
 /* Free basic token */
 void
 freeBasicToken(Token *token) {
+  printf("Free basic token: %d\n", token);
   if(token != NULL) {
     free(token);
   }
@@ -68,12 +70,14 @@ createStatementToken(Token *statement) {
   token->basicInfo.type       = STATEMENT_TOKEN;
   token->statement            = statement;
   token->basicInfo.dataType   = statement->basicInfo.dataType;
+  printf("Creating statement token: %d with statement: %d\n", token, statement);
   return token;
 }
 
 /* Free statement token */
 void
 freeStatementToken(Token *token) {
+  printf("free statement token: %d\n", token);
   if(token != NULL) {
     StatementToken *castedToken = (StatementToken *)token;
     freeToken(castedToken->statement);
@@ -84,6 +88,7 @@ freeStatementToken(Token *token) {
 /* Adds a statement to the list of statement */
 TokenList *
 addStatement(const TokenList *list, const Token *statement) {
+  printf("Adding statement %d to list %d.\n", statement, list);
   //We start from the first token of the list and search the first token with next equal to NULL
   TokenList *currentToken = (TokenList *)list;
   while (currentToken->next != NULL)
@@ -111,12 +116,14 @@ createStatementList(const Token *statement) {
   list->basicInfo.dataType  = statement->basicInfo.dataType;
   list->current             = (Token *)statement;   //First statement on the list
   list->next                = NULL;
+  printf("Creating statements token: %d with initial statement: %d\n", list, statement);
   return list;
 }
 
 /* Free statement list */
 void
 freeStatementList(Token *token) {
+  printf("free statements token: %d\n", token);
   if(token != NULL) {
     TokenList *castedToken = (TokenList *)token;
     freeToken(castedToken->current);
@@ -135,12 +142,14 @@ createBlockToken(const TokenList *statements) {
   token->basicInfo.type       = BLOCK_TOKEN;
   token->basicInfo.dataType   = statements->basicInfo.dataType;
   token->statements = (TokenList *)statements;
+  printf("Creating block token: %d with list: %d\n", token, statements);
   return token;
 }
 
 /* Free a block token */
 void
 freeBlockToken(Token *token) {
+  printf("free block token: %d\n", token);
   if(token != NULL) {
     BlockToken *castedToken = (BlockToken *)token;
     freeToken((Token *)castedToken->statements);
@@ -160,12 +169,13 @@ createSummationToken(const Token *initNum,const Token * condition ,const Token *
   token->initNum        = (Token *)initNum;
   token->condition      = (Token *)condition;
   token->finalNum       = (Token *)finalNum;
-  
+  printf("Creating summ token: %d\n", token);
   return token;
 }
 
 void
 freeSummationToken(Token * token){
+  printf("free summation token: %d\n", token);
   if(token != NULL) {
     SummationToken *castedToken = (SummationToken *)token;
     freeToken(castedToken->condition);
@@ -186,12 +196,13 @@ createProductionToken(const Token *initNum,const Token * condition ,const Token 
   token->initNum        = (Token *)initNum;
   token->condition      = (Token *)condition;
   token->finalNum       = (Token *)finalNum;
-
+  printf("Creating prod token: %d\n", token);
   return token;
 }
 
 void
 freeProductionToken(Token * token) {
+  printf("free prod token: %d\n", token);
   if(token != NULL) {
     ProductionToken *castedToken = (ProductionToken *)token;
     freeToken(castedToken->condition);
@@ -216,12 +227,14 @@ createIfToken(const Token *ifCondition, const Token *ifBlock, const Token *elifC
   token->elifCondition  = (Token *)elifCondition;
   token->elifBlock      = (Token *)elifBlock;
   token->elseBlock      = (Token *)elseBlock;
+  printf("Creating if token: %d\n", token);
   return token;
 }
 
 /* Free if token */
 void
 freeIfToken(Token *token) {
+  printf("free if token: %d\n", token);
   if(token != NULL) {
     IfToken *castedToken = (IfToken *)token;
     freeToken(castedToken->ifCondition);
@@ -244,12 +257,14 @@ createCalculateWhileToken(const Token *condition, const Token *block) {
   token->basicInfo.dataType   = DATA_NODATA;
   token->condition  = (Token *)condition;
   token->block      = (Token *)block;
+  printf("Creating while token: %d\n", token);
   return token;
 }
 
 /* Free while token */
 void
 freeCalculateWhileToken(Token *token) {
+  printf("free while token: %d\n", token);
   if(token != NULL) {
     CalculateWhileToken *castedToken = (CalculateWhileToken *)token;
     freeToken(castedToken->condition);
@@ -291,12 +306,14 @@ createOperationToken(const Token *first,const char *oper,const Token *second) {
   }
   
   strcpy(token->op, oper);
+  printf("Creating op token: %d with first: %d and second: %d\n", token, first, second);
   return token;
 }
 
 /* Free operation token */
 void
 freeOperationToken(Token *token) {
+  printf("free op token: %d\n", token);
   if(token != NULL) {
     OperationToken *castedToken = (OperationToken *)token;
     freeToken(castedToken->first);
@@ -328,12 +345,14 @@ createSingleOperationToken(const Token *operand, const char *oper) {
     }
 
     strcpy(token->op, oper);
+    printf("Creating sop token: %d with operand: %d\n", token, operand);
     return token;
 }
 
 /* Free single operation token */
 void
 freeSingleOperationToken(Token *token) {
+  printf("free sop token: %d\n", token);
   if(token != NULL) {
     SingleOperationToken *castedToken = (SingleOperationToken *)token;
     free(castedToken->op);
@@ -358,12 +377,14 @@ createStringToken(const char *string) {
   }
   
   strcpy(token->string, string);
+  printf("Creating string token: %d\n", token);
   return token;
 }
 
 /* Free string token */
 void
 freeStringToken(Token *token) {
+  printf("free string token: %d\n", token);
   if(token != NULL) {
     StringToken *castedToken = (StringToken *)token;
     free(castedToken->string);
@@ -388,12 +409,14 @@ createConstantToken(const char *constant) {
   }
   
   strcpy(token->constant, constant);
+  printf("Creating cte token: %d\n", token);
   return token;
 }
 
 /* Free constant token */
 void
 freeConstantToken(Token *token) {
+  printf("free cte token: %d\n", token);
   if(token != NULL) {
     ConstantToken *castedToken = (ConstantToken *)token;
     free(castedToken->constant);
@@ -418,12 +441,14 @@ createVariableToken(const char *var) {
   }
   
   strcpy(token->name, var);
+  printf("Creating var token: %d\n", token);
   return token;
 }
 
 /* Free variable token */
 void
 freeVariableToken(VariableToken *token) {
+  printf("free var token: %d\n", token);
   if(token != NULL) {
     //TODO: Fix this!!!!
     free(token->name);
@@ -459,12 +484,14 @@ createEmptyToken() {
   
   token->basicInfo.type     = NULL_TOKEN;
   token->basicInfo.dataType = DATA_NODATA;
+  printf("Creating empty token: %d\n", token);
   return token;
 }
 
 /* Free emtpy token */
 void
 freeEmptyToken(Token *token) {
+  printf("free empty token: %d\n", token);
   if(token != NULL) {
     free(token);
   }
@@ -507,6 +534,7 @@ createPrintToken(Token *expression) {
     token->basicInfo.dataType = DATA_NULL;
   }
   token->expression = expression;
+  printf("Creating print token: %d with expression: %d\n", token, expression);
   return token;
 }
 
@@ -514,7 +542,10 @@ createPrintToken(Token *expression) {
 /* Free a print token */
 void
 freePrintToken(Token *token) {
+  printf("free print token: %d\n", token);
   if(token != NULL) {
+    PrintToken *castedToken = (PrintToken *)token;
+    freeToken(castedToken->expression);
     free(token);
   }
 }
@@ -522,6 +553,7 @@ freePrintToken(Token *token) {
 void
 freeToken(Token *token) {
   if(token != NULL) {
+    printf("Freeing token type: %d\n", token->basicInfo.type);
     switch(token->basicInfo.type) {
       case NULL_TOKEN:
         freeEmptyToken(token);

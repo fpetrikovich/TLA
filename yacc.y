@@ -121,7 +121,10 @@ block:
 	| if_block 			{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
 	| loop_block		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
 	| statement 		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }				//Check this action
-	| block block 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} }
+	| block braces 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block if_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block loop_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block statement 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
 //	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 
