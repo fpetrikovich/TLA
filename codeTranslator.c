@@ -196,7 +196,7 @@ ifTranslator(Token *token) {
     //Just if
     snprintf(buffer, bufferLength, "if %s {%s}\n", ifCondition, ifBlock);
     //free what's uneeded
-    free(ifBlock);
+    //free(ifBlock);
     free(ifCondition);
   } else {
   	//Just if and else
@@ -207,7 +207,6 @@ ifTranslator(Token *token) {
   	free(ifBlock);
   	free(elseBlock);
   }
-
   return buffer;
 }
 
