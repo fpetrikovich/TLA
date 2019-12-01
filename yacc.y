@@ -110,8 +110,8 @@ statement:
 // 	;
 
 main:
-	  START instructions END { *code = createStatementList($2); $$ = (Token *)*code; check($$);}
-	| START END		  		 { *code = createEmptyToken(); $$ = (Token *)*code; check($$); }
+	  START instructions END { *code = createStatementList($2); $$ = *code; check($$);}
+	| START END		  		 { *code = NULL; $$ = *code; check($$); }
 
 instructions:
 	  block			      { $$ = (Token *)createStatementList($1); check($$); }
@@ -298,7 +298,7 @@ main(void) {
 	printf("#include <stdio.h>\n");
 	printf("#include <stdlib.h>\n\n");
 	printf("int main(int argc, char const *argv[]) {\n");
-	printf("%s\n", translateToC(code));
+	printf("%s\n", translateToC((Token *)code));
 	printf("\nreturn 0;\n}");
 
 	freeToken((Token *) code);
