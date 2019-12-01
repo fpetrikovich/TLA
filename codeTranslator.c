@@ -15,8 +15,8 @@ createOrFindVariable(const char *name) {
   return variables[i];
 }
 
-VariableToken *
-castVariable(VariableToken *variable, Token *token) {
+Token *
+castVariable(Token *variable, Token *token) {
   if(variable->dataType != DATA_NEW){
     /* Already casted before --> redeclaration = error */
     return NULL;
