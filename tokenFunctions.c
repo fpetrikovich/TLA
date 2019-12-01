@@ -118,7 +118,7 @@ createSummationToken(const Token *initNum,const Token * condition ,const Token *
   SummationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   if(initNum->dataType != DATA_NUMBER || finalNum->dataType != DATA_NUMBER){
-    token->dataType = NULL;
+    token->dataType = DATA_NULL;
   }
   token->type           = SUMMATION_TOKEN;
   token->initNum        = (Token *)initNum;
@@ -144,7 +144,7 @@ createProductionToken(const Token *initNum,const Token * condition ,const Token 
   ProductionToken *token = malloc(sizeof * token);
   if(!isValid(token)) return NULL;
   if(initNum->type != CONSTANT_TOKEN || finalNum  ->type != CONSTANT_TOKEN){
-    token->dataType = NULL;
+    token->dataType = DATA_NULL;
   }
   token->type           = PRODUCTION_TOKEN;
   token->initNum        = (Token *)initNum;
@@ -174,7 +174,7 @@ createIfToken(const Token *ifCondition, const Token *ifBlock, const Token *elifC
   if(!isValid(token)) return NULL;
   
   token->type           = IF_TOKEN;
-  token->dataType       = DATA_NULL;
+  token->dataType       = DATA_NODATA;
   token->ifCondition    = (Token *)ifCondition;
   token->ifBlock        = (Token *)ifBlock;
   token->elifCondition  = (Token *)elifCondition;
@@ -205,7 +205,7 @@ createCalculateWhileToken(const Token *condition, const Token *block) {
   if(!isValid(token)) return NULL;
   
   token->type       = WHILE_TOKEN;
-  token->dataType   = DATA_NULL;
+  token->dataType   = DATA_NODATA;
   token->condition  = (Token *)condition;
   token->block      = (Token *)block;
   return token;
@@ -239,12 +239,12 @@ createOperationToken(const Token *first, const Token *second, const char *oper) 
     if(first->dataType == DATA_NEW && strcmp(oper, "=") == 0) {
       token->dataType = second->dataType;
     } else {
-      token->dataType = NULL;
+      token->dataType = DATA_NULL;
     }
   } else {
     //If they match, the only operation permited to string is assignment
     if(first->dataType == DATA_STRING && strcmp(oper, "=") != 0) {
-      token->dataType = NULL;
+      token->dataType = DATA_NULL;
     } else {
       token->dataType = first->dataType;
     }
@@ -283,7 +283,7 @@ createSingleOperationToken(const Token *operand, const char *oper) {
 
     token->type     = SINGLE_OPERATION_TOKEN;
     if(operand->dataType != DATA_NUMBER) {
-      token->dataType = NULL
+      token->dataType = DATA_NULL
     } else {
       token->dataType = operand->dataType;
     }
@@ -428,7 +428,7 @@ createEmptyToken() {
   if(!isValid(token)) return NULL;
   
   token->type     = NULL_TOKEN;
-  token->dataType = DATA_NULL;
+  token->dataType = DATA_NODATA;
   return token;
 }
 
@@ -450,7 +450,7 @@ createNegationToken(Token *expression) {
   if(expression->dataType == DATA_NUMBER) {
     token->dataType = expression->dataType;
   } else {
-    token->dataType = NULL;
+    token->dataType = DATA_NULL;
   }
   token->expression = expression;
   return token;
@@ -474,7 +474,7 @@ createPrintToken(Token *expression) {
   if(expression->dataType == DATA_STRING) {
     token->dataType = expression->dataType;
   } else {
-    token->dataType = NULL;
+    token->dataType = DATA_NULL;
   }
   token->expression = expression;
   return token;
