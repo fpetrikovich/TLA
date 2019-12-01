@@ -175,6 +175,29 @@ freeSummationToken(Token * token){
   }
 }
 
+SlopeToken *
+createSlopeToken(const Token * coord1, const Token * coord2){
+  SlopeToken *token = malloc(sizeof * token);
+  if(!isValid(token)) return NULL;
+  if(coord1->basicInfo.type != COORDINATES_TOKEN || coord2->basicInfo.type != COORDINATES_TOKEN){
+    token->basicInfo.dataType = DATA_NULL;
+  }
+  token->basicInfo.type = CONSTANT_TOKEN;
+  token->coord1         = coord1;
+  token->coord2         = coord2;
+  return token;
+}
+
+void
+freeSlopeToken(Token * token){
+  if(token != NULL) {
+    SlopeToken *castedToken = (SlopeToken *)token;
+    freeToken(castedToken->coord1);
+    freeToken(castedToken->coord2);
+    free(token);
+  }
+}
+
 ProductionToken *
 createProductionToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
   ProductionToken *token = malloc(sizeof * token);
@@ -568,6 +591,9 @@ freeToken(Token *token) {
         break;
       case BLOCK_TOKEN:
         freeBlockToken(token);
+        break;
+      case SLOPE_TOKEN:
+        freeSlopeToken(token);
         break;
       default:
         printf("Something went wrong, this token has no valid type\n");

@@ -21,7 +21,8 @@ typedef enum {  NULL_TOKEN = 1,
                 VARIABLE_TOKEN,
                 BLOCK_TOKEN,
                 SUMMATION_TOKEN,
-                PRODUCTION_TOKEN
+                PRODUCTION_TOKEN,
+                SLOPE_TOKEN
 } TokenType;
 
 typedef enum {  DATA_NODATA = 1,
@@ -147,5 +148,17 @@ typedef struct ProductionToken {
   Token     *condition;       //Token of the condition number
   Token     *finalNum;        //Token of the final number
 } ProductionToken;
+
+typedef struct CoordinatesToken {
+  BasicInfo   basicInfo;
+  Token      *constant1;
+  Token      *constant2;
+} CoordinatesToken;
+
+typedef struct SlopeToken {
+  BasicInfo   basicInfo;
+  Token       *coord1;
+  Token       *coord2;
+} SlopeToken;
 
 #endif
