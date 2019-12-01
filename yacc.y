@@ -115,7 +115,7 @@ main:
 
 instructions:
 	  block			      { $$ = createStatementList($1); check((Token *)$$); }
-	| instructions block  { $$ = addStatement((Token *)$1, $2); check((Token *)$$); }
+	| instructions block  { $$ = addStatement($1, $2); check((Token *)$$); }
 	;
 
 block:
