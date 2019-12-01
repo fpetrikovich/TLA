@@ -84,13 +84,14 @@ statement:
 	| expression SEMI_COLON         { $$ = (Token *)createStatementToken($1); check($$); }
 	| print_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
 	| return_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
+	| math_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
+	;
 
 declaration:
  	  NUMBER_TYPE VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_NUMBER); check($$);}
  	| STRING_TYPE VAR 					 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_STRING); check($$);} 	
  	| declaration ASSIGN expression  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
-    | declaration ASSIGN math_block  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
  	// | function_declaration
 
 // function_declaration:
@@ -241,16 +242,19 @@ assign_op:
 	;
 
 assign_operation:
-	  variable assign_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
-    | variable assign_op math_block  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
+	variable assign_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	// | variable assign_op slope_block { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 
 
  math_block:
- 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES
- 	  	{ $$ = (Token *)createSigmaPiToken(SUMMATION_TYPE, $3); check($$); }
- 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES
- 	  	{ $$ = (Token *)createSigmaPiToken(PRODUCTION_TYPE, $3); check($$); }
+ 	  SUMMATION OPEN_PARENTHESES variable SEMI_COLON math_condition CLOSE_PARENTHESES
+ 	  	{ $$ = (Token *)createSigmaPiToken(SUMMATION_TYPE, $3, $5); check($$); }
+ 	| PRODUCT OPEN_PARENTHESES variable SEMI_COLON math_condition CLOSE_PARENTHESES
+ 	  	{ $$ = (Token *)createSigmaPiToken(PRODUCTION_TYPE, $3, $5); check($$); }
+ 	| SUMMATION OPEN_PARENTHESES declaration SEMI_COLON math_condition CLOSE_PARENTHESES
+ 	  	{ $$ = (Token *)createSigmaPiToken(SUMMATION_TYPE, $3, $5); check($$); }
+ 	| PRODUCT OPEN_PARENTHESES declaration SEMI_COLON math_condition CLOSE_PARENTHESES
+ 	  	{ $$ = (Token *)createSigmaPiToken(PRODUCTION_TYPE, $3, $5); check($$); }
  	;
 
 math_condition:
@@ -319,7 +323,6 @@ main(void) {
 		printf("#include <stdio.h>\n");
 		printf("#include <stdlib.h>\n\n");
 		printf("int main(int argc, char const *argv[]) {\n");
-		printf("int aux;\n");			/* Necessary for summation and production */
 		printf("%s\n", translation);
 		printf("\nreturn 0;\n}");
 	}

@@ -399,15 +399,18 @@ statementTranslator(Token *token) {
   	return NULL;
   }
 
+  char semiColon = (castedToken->statement->basicInfo.type == SIGMA_PI_TOKEN ? 0 : 1);
+
   //Aside from the length of the statement we need space for the new line and the NULL
-  const size_t bufferLength = strlen(statement) + strlen(";\n") + 1;
+  const size_t bufferLength = strlen(statement) + semiColon + strlen("\n") + 1;
   //We create an initial buffer to save our translated code to
   char *buffer 							= malloc(bufferLength);
   if(buffer == NULL) {
   	return NULL;
   }
-  //We copy to buffer
-  snprintf(buffer, bufferLength, "%s;\n", statement);
+
+  if (semiColon == 1) snprintf(buffer, bufferLength, "%s;\n", statement);
+  else snprintf(buffer, bufferLength, "%s\n", statement);
 
   //We no longer need the statement string so we free it
   free(statement);
@@ -511,6 +514,7 @@ char *
 changeAssignmentToLessThanOrEqualTo(char *string) {
   ssize_t length = strlen(string) + 1;
   char *newString = malloc(length);
+  if (newString == NULL) return NULL;
   snprintf(newString, length, "%s", string);
 
   /* Works because there is an empty space between the variables and the = */
@@ -524,6 +528,19 @@ changeAssignmentToLessThanOrEqualTo(char *string) {
 }
 
 char *
+removeDeclaration(char *string) {
+  ssize_t len = strlen(string);
+  char startIdx = 4;
+  if (strncmp("int ", string, 4) == 0){
+    char *newString = malloc(len - startIdx + 1);
+    if (newString == NULL) return NULL;
+    strncpy(newString, string + startIdx, len - startIdx + 1);
+    return newString;
+  }
+  return string;
+}
+
+char *
 sigmaPiTranslator(Token *token) {
   SigmaPiToken          *castedToken = (SigmaPiToken *)token;
   SigmaPiConditionToken *condToken   = (SigmaPiConditionToken *)castedToken->condition;
@@ -531,20 +548,26 @@ sigmaPiTranslator(Token *token) {
   OperationToken        *finalNum    = (OperationToken *)condToken->finalNum;
 
   /* Defining the limits of the variable we will iterate through */
-  char *auxVariable     = "aux = 0;";  // Where the result will be saved
-  char *variable        = process((Token *)startNum->first);
+  char *acumVariable    = process(castedToken->acum);  // Where the result will be saved
+  char *acumUndeclared  = removeDeclaration(acumVariable);
+  char *iterateVariable = process((Token *)startNum->first);
   char *startAssignment = process((Token *)startNum);
   char *endAssignment   = process((Token *)finalNum);
-  char *expression = process((Token *)condToken->expression);
+  char *expression      = process((Token *)condToken->expression);
+  char mathSymbol;
+
+  mathSymbol = (castedToken->mathType == SUMMATION_TYPE ? '+' : '*');
 
   endAssignment = changeAssignmentToLessThanOrEqualTo(endAssignment);
 
-  ssize_t bufferLength = strlen(auxVariable) + (strlen(variable) + 2) + strlen(startAssignment) + strlen(endAssignment) +strlen(expression) + strlen("\nfor(;;) {\naux+=;\n}\n");
+  ssize_t bufferLength = (strlen(iterateVariable) + 2) + strlen(startAssignment) + strlen(endAssignment) + strlen(expression) + strlen(acumUndeclared) + strlen(acumVariable) + strlen(" = 0;\nfor(;;) {\n+=;\n}\n");
   char *buffer = malloc(bufferLength);
 
-  snprintf(buffer, bufferLength, "%s\nfor(%s;%s;%s++){\naux+=%s;\n}\n", auxVariable, startAssignment, endAssignment, variable, expression);
+  snprintf(buffer, bufferLength, "%s = 0;\nfor(%s;%s;%s++){\n%s%c=%s;\n}\n", acumVariable, startAssignment, endAssignment, iterateVariable, acumUndeclared, mathSymbol, expression);
 
-  free(variable);
+  if (strcmp(acumVariable, acumUndeclared) != 0) free(acumUndeclared);
+  free(acumVariable);
+  free(iterateVariable);
   free(startAssignment);
   free(endAssignment);
   free(expression);

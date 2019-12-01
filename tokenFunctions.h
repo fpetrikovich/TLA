@@ -87,7 +87,8 @@ createPrintToken 			(Token *expression);
 
 SigmaPiToken *
 createSigmaPiToken		    (MathType type, 
-							 const Token *condtion);
+							 Token *acumVariable,
+							 Token *condtion);
 
 SigmaPiConditionToken *
 createSigmaPiConditionToken (const Token *initNum,

@@ -143,6 +143,7 @@ typedef struct SigmaPiToken {
   BasicInfo   basicInfo;
   MathType    mathType;
   Token      *condition;
+  Token      *acum;
 } SigmaPiToken;
 
 typedef struct SigmaPiConditionToken {

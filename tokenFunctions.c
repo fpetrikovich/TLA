@@ -149,15 +149,15 @@ freeBlockToken(Token *token) {
 }
 
 SigmaPiToken *
-createSigmaPiToken(MathType type, const Token *condition) {
-  printf("IN HERE!\n");
+createSigmaPiToken(MathType type, Token *acumVariable, Token *condition) {
   SigmaPiToken *token = malloc(sizeof *token);
   if (!isValid(token)) return NULL;
   
   token->basicInfo.type     = SIGMA_PI_TOKEN;
   token->basicInfo.dataType = condition->basicInfo.dataType;
   token->mathType           = type;  
-  token->condition          = (Token *)condition;
+  token->condition          = condition;
+  token->acum               = acumVariable;
   return token;
 }
 
@@ -172,7 +172,6 @@ freeSigmaPiToken(Token * token){
 
 SigmaPiConditionToken *
 createSigmaPiCondtionToken (const Token *initNum, const Token *expr, const Token *finalNum) {
-  printf("IN CONDITION TOKEN\n");
   SigmaPiConditionToken *token = malloc(sizeof *token);
 
   token->basicInfo.type     = SIGMA_PI_COND_TOKEN;
@@ -204,7 +203,6 @@ checkLimits(OperationToken *num1, OperationToken *num2) {
 
 SigmaPiConditionToken *
 createSigmaPiConditionToken (const Token *initNum, const Token *expr, const Token *finalNum) {
-  printf("IN CONDITION TOKEN\n");
   SigmaPiConditionToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
 
@@ -319,7 +317,6 @@ freeCalculateWhileToken(Token *token) {
 OperationToken *
 createOperationToken(const Token *first,const char *oper,const Token *second) {
   //First we allocate memory
-  printf("IN OPERATION_TOKEN\n");
   OperationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
@@ -462,7 +459,6 @@ freeConstantToken(Token *token) {
 /* Creates a token for a variable */
 VariableToken *
 createVariableToken(const char *var) {
-  printf("IN VARIABLE_TOKEN = %s\n", var);
   VariableToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
