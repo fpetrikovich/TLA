@@ -291,7 +291,7 @@ main(void) {
 		printf("Unable to allocate space for the variables\n");
 		exit(EXIT_FAILURE);
 	}
-	memset(variables, NULL, sizeof(VariableToken *) * MAX_VARIABLES);
+	memset(variables, '\0', sizeof(VariableToken *) * MAX_VARIABLES);
 	
 	yyparse(&code);
 
