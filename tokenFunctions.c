@@ -404,8 +404,10 @@ void
 freeVariableToken(Token *token) {
   if(token != NULL) {
     VariableToken *castedToken = (VariableToken *)token;
-    free(castedToken->name);
-    free(token);
+    //TODO: Fix this!!!!
+    //free(castedToken->name);
+    //free(castedToken->variable);
+    //free(token);
   }
 }
 
