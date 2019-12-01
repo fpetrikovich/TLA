@@ -74,6 +74,9 @@ char *
 ifTranslator(Token *token) {
   IfToken *castedToken = (IfToken *)token;
 
+  //Declaration
+  char *ifCondition, *ifBlock, *elifCondition, *elifBlock, *elseBlock;
+
   //Translate parts of the if to C
   char *ifCondition = process(castedToken->ifCondition);
   if(ifCondition == NULL) {
