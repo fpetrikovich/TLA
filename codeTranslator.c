@@ -560,7 +560,7 @@ process(Token *token) {
 /* Main function to translate our code to C code 
 		its return value should be free'd by whoever requested it once they are done with it */
 char *
-translateToC(Token *token) {
+translateToC(TokenList *token) {
 
 	//Load C program in string form
 	char *code = process(token);
