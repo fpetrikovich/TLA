@@ -79,4 +79,23 @@ createPrintToken 			(Token *expression);
 void
 freeToken					(Token *token);
 
+void
+freeStatementList(Token *token);
+
+void
+freeBlockToken(Token *token);
+
+void
+freeSummationToken(Token * token);
+
+void
+freeProductionToken(Token * token);
+
+void
+freeIfToken(Token *token);
+
+void
+freeCalculateWhileToken(Token *token);
+
+
 #endif
