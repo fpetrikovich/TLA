@@ -376,7 +376,7 @@ calculateWhileTranslator(Token *token) {
   }
 
   //Calculate length of buffer
-  const size_t bufferLength = strlen(condition) + strlen(block) + strlen("while %s {%s}") + 1;
+  const size_t bufferLength = strlen("do {}") + strlen(block) + strlen(condition) + strlen("while %s;") + 1;
   char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
   	free(condition);
@@ -385,7 +385,7 @@ calculateWhileTranslator(Token *token) {
   }
 
   //We copy to buffer
-  snprintf(buffer, bufferLength, "while %s {%s}", condition, block);
+  snprintf(buffer, bufferLength, "do {\n%s} while %s;", block, condition);
 
   //We free uneeded strings
   free(condition);
