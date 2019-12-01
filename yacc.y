@@ -49,7 +49,7 @@ TokenList *code;
 %token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
-%token NUMBER NUMBER_VAL FUNCTION COORDINATES VAR STRING STRING_VAL
+%token NUMBER FUNCTION COORDINATES VAR STRING 
 %token NEW_LINE 
 %token START END
 
@@ -275,7 +275,7 @@ check(Token * token) {
         	// Has no dataType field
         	break;
        	default:
-       	    if (token->dataType == DATA_NEW) yyerror(&code, "Incorrect type in assignment or operation");
+       	    if (token->dataType == DATA_NULL) yyerror(&code, "Incorrect type in assignment or operation");
     }
 }
 
