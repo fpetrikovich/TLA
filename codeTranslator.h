@@ -43,6 +43,9 @@ statementTranslator(Token *token);
 char *
 statementListTranslator(Token *token);
 
+char *
+SlopeTranslator(Token *token);
+
 static char *
 process(Token *token);
 
