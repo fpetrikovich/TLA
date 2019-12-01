@@ -63,8 +63,7 @@ TokenList *code;
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
-%type <string> VAR 
-%type <string> FUNCTION COORDINATES NUMBER STRING
+%type <string> FUNCTION COORDINATES NUMBER STRING VAR
 %type <string> count_op assign_op relational_op logic_op one_op
 
 
