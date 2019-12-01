@@ -548,7 +548,7 @@ freeToken(Token *token) {
         freeBlockToken(token);
         break;
       default:
-        print("Something went wrong, this token has no valid type");
+        printf("Something went wrong, this token has no valid type\n");
     }
   }
 }
