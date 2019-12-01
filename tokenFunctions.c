@@ -4,6 +4,17 @@
 #include "tokenFunctions.h"
 #include "translationTokens.h"
 
+
+/* Internal function for verifying the pointer returned by malloc/calloc */
+static int
+isValid(void *ptr) {
+    if (ptr == NULL) {
+        fprintf(stderr, "Error allocating heap space\n");
+        return 0;
+    }
+    return 1;
+}
+
 /* Creates a basic token */
 Token *
 createToken(TokenType type, DataType dataType) {
@@ -489,16 +500,6 @@ freePrintToken(Token *token) {
   }
 }
 
-/* Internal function for verifying the pointer returned by malloc/calloc */
-static int
-isValid(void *ptr) {
-    if (ptr == NULL) {
-        fprintf(stderr, "Error allocating heap space\n");
-        return 0;
-    }
-    return 1;
-}
-
 void
 freeToken(Token *token) {
   if(token != NULL) {
@@ -525,7 +526,7 @@ freeToken(Token *token) {
         freeStatementToken(token);
         break;
       case STATEMENTS_TOKEN:
-        freeStatmentList(token);
+        freeStatementList(token);
         break;
       case NEGATION_TOKEN:
         freeNegationToken(token);
@@ -539,8 +540,6 @@ freeToken(Token *token) {
       case CONSTANT_TOKEN:
         freeConstantToken(token);
         break;
-      case INTEGER_TOKEN:
-      case DOUBLE_TOKEN:
       case FUNCTION_TOKEN:
       case COORDINATES_TOKEN:
         //TODO
@@ -551,7 +550,6 @@ freeToken(Token *token) {
       case BLOCK_TOKEN:
         freeBlockToken(token);
         break;
-      default:
     }
   }
 }
