@@ -16,7 +16,8 @@ typedef enum {  NULL_TOKEN = 1,
                 PRINT_TOKEN,
                 STRING_TOKEN,
                 CONSTANT_TOKEN,
-                FUNCTION_TOKEN,
+                FUNCTION_DEF_TOKEN,
+                FUNCTION_CALL_TOKEN,
                 COORDINATES_TOKEN,
                 VARIABLE_TOKEN,
                 BLOCK_TOKEN,
@@ -26,6 +27,7 @@ typedef enum {  NULL_TOKEN = 1,
 } TokenType;
 
 typedef enum {  DATA_NODATA = 1,
+                DATA_FUNCTION,
                 DATA_NEW,
                 DATA_NULL,
                 DATA_NUMBER,
@@ -52,6 +54,20 @@ typedef struct TokenList {
   Token              *current;
   struct TokenList   *next;
 } TokenList;
+
+/* Token for functions */
+typedef struct FunctionDefinitionToken {
+  BasicInfo     basicInfo;
+  Token         *name;
+  Token         *body;
+  Token         *param;
+} FunctionDefinitionToken;
+
+typedef struct FunctionCallToken {
+  BasicInfo   basicInfo;
+  Token       *name;
+  Token       *expression;
+} FunctionCallToken;
 
 /* Token for operations */
 typedef struct OperationToken {

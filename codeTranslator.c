@@ -4,6 +4,89 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static TranslatedFunctions *functions = NULL;
+
+/* String pointer array to store functions */
+char *
+getFunctions() {
+  //We verify there are functions to return
+  if(functions == NULL) {
+    return NULL;
+  }
+
+  //We generate the string
+  TranslatedFunctions *current = functions;
+  size_t stringLenght = 1;
+  //Empty buffer
+  char *buffer = malloc(1);
+  if(buffer == NULL) {
+    return NULL;
+  }
+  buffer[0] = '\0';
+  do {
+    stringLenght += strlen(current->translation);
+    char *newBuffer = realloc(buffer, stringLenght);
+    if(newBuffer == NULL) {
+      free(buffer);
+      return NULL;
+    }
+
+    buffer = newBuffer;
+
+    strcat(buffer, current->translation);
+  } while ((current = current->next) != NULL);
+
+  return buffer;
+}
+
+void
+freeFunctions() {
+  TranslatedFunctions *current = functions;
+
+  while(current != NULL) {
+    TranslatedFunctions *next = current->next;
+    free(current->translation);
+    free(current);
+    current = next;
+  }
+}
+
+int
+addFunctionToArray(char *translation) {
+  TranslatedFunctions *current = functions;
+  
+  //First one
+  if(current == NULL) {
+    current = malloc(sizeof*current);
+    if(current == NULL) {
+      return -1;
+    }
+
+    current->translation = translation;
+    current->next = NULL;
+
+    functions = current;
+    return 0;
+  }
+
+  TranslatedFunctions *previous = NULL;
+  while(current != NULL) {
+    previous = current;
+    current = current->next;
+  }
+
+  //In previous is the last one
+  current = malloc(sizeof*current);
+  if(current == NULL) {
+    return -1;
+  }
+
+  current->translation = translation;
+  current->next = NULL;
+
+  previous->next = current;
+  return 0;
+}
 
 /* Translator for string */
 char *
@@ -65,6 +148,107 @@ variableTranslator(Token *token) {
   variable->declared = 1;
 
   return newVariable;
+}
+
+/* Translator for function definition token */
+char *
+functionDefTranslator(Token *token) {
+  FunctionDefinitionToken *castedToken = (FunctionDefinitionToken *)token;
+
+  //We process the body
+  char *body = process(castedToken->body);
+
+  if(body == NULL) {
+    return NULL;
+  }
+
+  //We process the name
+  char *name = process(castedToken->name);
+
+  if(name == NULL) {
+    free(body);
+    return NULL;
+  }
+
+  char *param = process(castedToken->param);
+
+  if(param == NULL) {
+    free(name);
+    free(body);
+    return NULL;
+  }
+
+  size_t bufferLength = strlen(name) + strlen(param) + strlen(body) + strlen("%s (%s) {%s}\n"); + 1;
+  char *buffer = malloc(bufferLength);
+  if(buffer == NULL) {
+    free(name);
+    free(param);
+    free(body);
+    return NULL;
+  }
+
+  char *dummyBuffer = malloc(2);
+  if(dummyBuffer == NULL) {
+    free(name);
+    free(param);
+    free(body);
+    free(buffer);
+    return NULL;
+  }
+
+  snprintf(buffer, bufferLength, "%s(%s){%s}\n", name, param, body);
+
+  //Now instead of returning it we add it to our external array and we return a dummy
+  if(addFunctionToArray(buffer) == -1) {
+    free(dummyBuffer);
+    free(buffer);
+    free(name);
+    free(param);
+    free(body);
+    return NULL;
+  }
+
+  dummyBuffer[0] = ' ';
+  dummyBuffer[1] = '\0';
+
+  free(name);
+  free(param);
+  free(body);
+
+  return dummyBuffer;
+}
+
+/* Translator for function call */
+char *
+functionCallTranslator(Token *token) {
+  FunctionCallToken *castedToken = (FunctionCallToken *)token;
+
+  char *expression = process(castedToken->expression);
+  if(expression == NULL) {
+    return NULL;
+  }
+
+  char *name = process(castedToken->name);
+  if(name == NULL) {
+    free(expression);
+    return NULL;
+  }
+
+  size_t bufferLength = strlen(expression) + strlen(name) + strlen("%s(%s)") + 1;
+  char *buffer = malloc(bufferLength);
+
+  if(buffer == NULL) {
+    free(expression);
+    free(name);
+    return NULL;
+  }
+
+  snprintf(buffer, bufferLength, "%s(%s)", name, expression);
+
+  free(name);
+  free(expression);
+
+  return buffer;
 }
 
 /* Translator for if token */
@@ -474,7 +658,7 @@ singleOperationTranslator(Token *token) {
   char *variable = process(soToken->operand);
   if (variable == NULL) return NULL;
 
-  const ssize_t bufferLength = strlen(variable) + 2 + 1; //+2 for ++ or --
+  const size_t bufferLength = strlen(variable) + 2 + 1; //+2 for ++ or --
 
   char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
@@ -556,7 +740,12 @@ process(Token *token) {
   	case CONSTANT_TOKEN:
   		returnValue = constantTranslator(token);
   		break;
-  	case FUNCTION_TOKEN:
+  	case FUNCTION_DEF_TOKEN:
+      returnValue = functionDefTranslator(token);
+      break;
+    case FUNCTION_CALL_TOKEN:
+      returnValue = functionCallTranslator(token);
+      break;
   	case COORDINATES_TOKEN:
   		//TODO
   		break;

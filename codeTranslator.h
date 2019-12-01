@@ -3,7 +3,30 @@
 
 #include "tokenFunctions.h"
 
+/* For storing functions */
+typedef struct translatedFunctions {
+	char 						*translation;
+	struct translatedFunctions 	*next;
+} TranslatedFunctions;
 
+/* Frees functions */
+void
+freeFunctions();
+
+/* Generates a single string for the functions */
+char *
+getFunctions();
+
+int
+addFunctionToArray(char *translation);
+
+char *
+functionDefTranslator(Token *token);
+
+char *
+functionCallTranslator(Token *token);
+
+/* For the rest */
 char *
 stringTranslator(Token *token);
 
