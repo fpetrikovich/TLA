@@ -261,7 +261,6 @@ freeCalculateWhileToken(Token *token) {
 /* Creates an operation token */
 OperationToken *
 createOperationToken(const Token *first,const char *oper,const Token *second) {
-  printf("Type: %d %d\n", first->type, second->type);
   //First we allocate memory
   OperationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
@@ -310,7 +309,6 @@ freeOperationToken(Token *token) {
 /* Creates a single operation token */
 SingleOperationToken *
 createSingleOperationToken(const Token *operand, const char *oper) {
-  printf("dataType: %d\n", operand->dataType);
     //First we allocate memory
     SingleOperationToken *token = malloc(sizeof *token);
     if(!isValid(token)) return NULL;
