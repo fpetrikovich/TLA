@@ -278,7 +278,7 @@ check(Token * token) {
         	// Has no dataType field
         	break;
        	default:
-       	    if (token->dataType == NULL) yyerror(&code, "Incorrect type in assignment or operation");
+       	    if (token->dataType == DATA_NEW) yyerror(&code, "Incorrect type in assignment or operation");
     }
 }
 

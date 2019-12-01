@@ -24,7 +24,10 @@ typedef enum {  NULL_TOKEN = 1,
                 PRODUCTION_TOKEN
 } TokenType;
 
-typedef enum {  DATA_NUMBER,
+typedef enum {  DATA_NODATA,
+                DATA_NEW,
+                DATA_NULL,
+                DATA_NUMBER,
                 DATA_STRING,
                 DATA_COORDINATES
 } DataType;
