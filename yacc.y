@@ -110,7 +110,7 @@ statement:
 // 	;
 
 main:
-	  START instructions END { *code = createStatementList($2); $$ = *code; check($$);}
+	  START instructions END { *code = createStatementList((Token *)$2); $$ = *code; check($$);}
 	| START END		  		 { *code = NULL; $$ = *code; check($$); }
 
 instructions:
