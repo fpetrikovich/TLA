@@ -9,12 +9,18 @@ coordinates \(-?[0-9]+,-?[0-9]+\)
 new_line 	\n
 
 %%
+"start"					return START;
+"end"					return END;
 "if"					return IF;
 "elif"					return ELIF;
 "else"					return ELSE;
 "calculate"				return DO;
 "while"					return WHILE;
 "print"					return PRINT;
+"number"				return NUMBER;
+"coordinates"			return COORDINATES;
+"string"				return STRING;	
+"function"				return FUNCTION; //NO SE SI VA ESTA?
 "+="					return ASSIGN_SUM;
 "*="					return ASSIGN_MULTI;
 "\\=?"					return ASSIGN_DIV;
@@ -49,12 +55,7 @@ new_line 	\n
 "}"						return CLOSE_BRACES;
 "("						return OPEN_PARENTHESES;
 ")"						return CLOSE_PARENTHESES;
-"start"					return START;
-"end"					return END;
-"number"				return NUMBER;
-"coordinates"			return COORDINATES;
-"string"				return STRING;	
-"function"				return FUNCTION; //NO SE SI VA ESTA?
+
 
 {number} 				{ strcpy(yylval.string, yytext); return NUMBER; }
 {coordinates} 			{ strcpy(yylval.string, yytext); return STRING; }
