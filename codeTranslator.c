@@ -486,6 +486,27 @@ singleOperationTranslator(Token *token) {
   return buffer;
 }
 
+char *
+SlopeTranslator(Token *token) {
+  SlopeToken *sToken = (SlopeToken *)token;
+  char *coord1 = process(sToken->coord1);
+  char *coord2 = process(sToken->coord2);
+
+  if (coord1 == NULL || coord2 == NULL) return NULL;
+
+  const size_t bufferLength = strlen(coord1) + strlen(coord2) + 9; //+2 for ++ or --
+
+  char *buffer = malloc(bufferLength);
+  if(buffer == NULL) {
+    return NULL;
+  }
+  //We copy to buffer
+  snprintf(buffer, bufferLength, "slope(%s,%s)\n", coord1, coord2);
+  free(coord1);
+  free(coord2);
+  return buffer;
+  
+}
 
 /* Token processing function
 		its return value should be free'd by whoever requested it once they are done with it */
@@ -545,6 +566,8 @@ process(Token *token) {
   	case BLOCK_TOKEN:
   		returnValue = blockTranslator(token);
   		break;
+    case SLOPE_TOKEN:
+      returnValue = SlopeTranslator(token);
   }
   //Return the translation of the token
   return returnValue;
