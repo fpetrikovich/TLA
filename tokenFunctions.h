@@ -85,6 +85,10 @@ createNegationToken 		(Token *expression);
 PrintToken *
 createPrintToken 			(Token *expression);
 
+SummationToken *
+createSummationToken(const Token *initNum,const Token * condition ,const Token *finalNum);
+
+
 /* Free's a token */
 void
 freeToken					(Token *token);

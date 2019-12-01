@@ -474,7 +474,7 @@ singleOperationTranslator(Token *token) {
   char *variable = process(soToken->operand);
   if (variable == NULL) return NULL;
 
-  const ssize_t bufferLength = strlen(variable) + 2 + 1; //+2 for ++ or --
+  const size_t bufferLength = strlen(variable) + 2 + 1; //+2 for ++ or --
 
   char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
@@ -486,6 +486,43 @@ singleOperationTranslator(Token *token) {
   return buffer;
 }
 
+char *
+summationTranslator(Token *token) {
+  SummationToken *sToken = (SummationToken *)token;
+
+  char * condition = process(sToken->condition);
+  char * initialNum = process(sToken->initNum);
+  char * finalNum = process(sToken->finalNum);
+
+  const size_t bufferLength = strlen(initialNum) + strlen(condition) +strlen(finalNum) +18;
+  char *buffer = malloc(bufferLength);
+  if(buffer == NULL)
+    return NULL;
+  snprintf(buffer, bufferLength, "Summation(%s, %s, %s);\n", initialNum,condition,finalNum);
+  free(condition);
+  free(initialNum);
+  free(finalNum);
+  return buffer;
+}
+
+char *
+productionTranslator(Token *token) {
+  ProductionToken *pToken = (ProductionToken *)token;
+
+  char * condition = process(pToken->condition);
+  char * initialNum = process(pToken->initNum);
+  char * finalNum = process(pToken->finalNum);
+
+  const size_t bufferLength = strlen(initialNum) + strlen(condition) +strlen(finalNum) +18;
+  char *buffer = malloc(bufferLength);
+  if(buffer == NULL)
+    return NULL;
+  snprintf(buffer, bufferLength, "Production(%s, %s, %s);\n", initialNum,condition,finalNum);
+  free(condition);
+  free(initialNum);
+  free(finalNum);
+  return buffer;
+}
 
 /* Token processing function
 		its return value should be free'd by whoever requested it once they are done with it */
@@ -545,6 +582,12 @@ process(Token *token) {
   	case BLOCK_TOKEN:
   		returnValue = blockTranslator(token);
   		break;
+    case PRODUCTION_TOKEN:
+      returnValue = productionTranslator(token);
+      break;
+    case SUMMATION_TOKEN:
+      returnValue = summationTranslator(token);
+      break;
   }
   //Return the translation of the token
   return returnValue;

@@ -156,11 +156,11 @@ createSummationToken(const Token *initNum,const Token * condition ,const Token *
   if(initNum->dataType != DATA_NUMBER || finalNum->dataType != DATA_NUMBER){
     token->dataType = DATA_NULL;
   }
+  token->dataType       = DATA_NUMBER;
   token->type           = SUMMATION_TOKEN;
   token->initNum        = (Token *)initNum;
   token->condition      = (Token *)condition;
   token->finalNum       = (Token *)finalNum;
-  
   return token;
 }
 
@@ -568,6 +568,12 @@ freeToken(Token *token) {
         break;
       case BLOCK_TOKEN:
         freeBlockToken(token);
+        break;
+      case SUMMATION_TOKEN:
+        freeSummationToken(token);
+        break;
+      case PRODUCTION_TOKEN:
+        freeProductionToken(token);
         break;
       default:
         printf("Something went wrong, this token has no valid type\n");
