@@ -1,7 +1,7 @@
-#include "translationTokens.h"
-
 #ifndef CODE_TRANSLATOR_H
 #define CODE_TRANSLATOR_H
+
+#include "translationTokens.h"
 
 #define MAX_VAR_NAME  50
 
