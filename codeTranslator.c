@@ -554,7 +554,6 @@ process(Token *token) {
   	case BLOCK_TOKEN:
   		returnValue = blockTranslator(token);
   		break;
-  	default:
   }
   //Return the translation of the token
   return returnValue;
