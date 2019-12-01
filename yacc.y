@@ -295,7 +295,7 @@ main(void) {
 	printf("#include <stdio.h>\n");
 	printf("#include <stdlib.h>\n\n");
 	printf("int main(int argc, char const *argv[]) {\n");
-	char * translation = translationToC((Token *)code);
+	char * translation = translateToC((Token *)code);
 	printf("%s\n", translation);
 	printf("\nreturn 0;\n}");
 
