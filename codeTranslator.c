@@ -34,12 +34,12 @@ char *
 stringTranslator(Token *token) {
   char *value = ((StringToken *)token)->string;
 
-  const size_t bufferLenght = strlen(value) + 1;
-  char *buffer = malloc(bufferLenght);
+  const size_t bufferLength = strlen(value) + 1;
+  char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
   	return NULL;
   }
-  snprintf(buffer, bufferLenght, "%s", value);
+  snprintf(buffer, bufferLength, "%s", value);
 
   return buffer;
 }
@@ -59,8 +59,8 @@ constantTranslator(Token *token) {
 /* Translator for variable token */
 char *
 variableTranslator(Token *token) {
-  printf("IN VARIABLE_TRANSLATOR\n");
   VariableToken *variable = (VariableToken *)token;
+
   char *name = variable->name;
   int length = 0;
   char *dataType;
@@ -81,11 +81,12 @@ variableTranslator(Token *token) {
     return NULL;
   }
   if (variable->declared == 0){
-    variable->declared = 1;
     snprintf(newVariable, length, "%s%s_", dataType, name);
   } else {
+    // printf("name = %s\n", name);
     snprintf(newVariable, length, "%s_", name);
   }
+  variable->declared = 1;
 
   return newVariable;
 }
@@ -144,20 +145,20 @@ ifTranslator(Token *token) {
   	}
   }
 
-  //We calculate the buffer lenght, there are three different cases
-  //The base lenght is:
- 	size_t bufferLenght = strlen(ifCondition) + strlen(ifBlock) + strlen("if %s {%s}") + 2;	//+2 cuz i consider a \n as well
+  //We calculate the buffer length, there are three different cases
+  //The base length is:
+ 	size_t bufferLength = strlen(ifCondition) + strlen(ifBlock) + strlen("if %s {%s}") + 2;	//+2 cuz i consider a \n as well
  	//If there is an elif we should add it:
  	if(castedToken->elifCondition != NULL && castedToken->elifBlock != NULL) {
- 		bufferLenght += strlen(elifCondition) + strlen(elifBlock) + strlen(" else if %s {%s}");
+ 		bufferLength += strlen(elifCondition) + strlen(elifBlock) + strlen(" else if %s {%s}");
  	}
  	//If there is an else block we should add it:
  	if(castedToken->elseBlock != NULL) {
- 		bufferLenght += strlen(elseBlock) + strlen(" else {%s}");
+ 		bufferLength += strlen(elseBlock) + strlen(" else {%s}");
  	}
 
  	//Now we allocate the space
-  char *buffer = malloc(bufferLenght);
+  char *buffer = malloc(bufferLength);
   if (buffer == NULL) {
   	free(ifCondition);
   	free(ifBlock);
@@ -174,7 +175,7 @@ ifTranslator(Token *token) {
   //Now we add to buffer according to the different cases
   if(castedToken->elifCondition != NULL && castedToken->elifBlock != NULL && castedToken->elseBlock != NULL) {
   	//Everything is present
-  	snprintf(buffer, bufferLenght, "if %s {%s} else if %s {%s} else {%s}\n", ifCondition, ifBlock, elifCondition, elifBlock, elseBlock);
+  	snprintf(buffer, bufferLength, "if %s {%s} else if %s {%s} else {%s}\n", ifCondition, ifBlock, elifCondition, elifBlock, elseBlock);
 
   	//Free what's uneeded
   	free(ifCondition);
@@ -184,7 +185,7 @@ ifTranslator(Token *token) {
   	free(elseBlock);
   } else if(castedToken->elifCondition != NULL && castedToken->elifBlock != NULL) {
   	//Just else missing
-  	snprintf(buffer, bufferLenght, "if %s {%s} else if %s {%s}\n", ifCondition, ifBlock, elifCondition, elifBlock);
+  	snprintf(buffer, bufferLength, "if %s {%s} else if %s {%s}\n", ifCondition, ifBlock, elifCondition, elifBlock);
 
   	//Free what's uneeded
   	free(ifCondition);
@@ -193,7 +194,7 @@ ifTranslator(Token *token) {
   	free(elifBlock);
   } else {
   	//Just if and else
-  	snprintf(buffer, bufferLenght, "if %s {%s} else {%s}\n", ifCondition, ifBlock, elseBlock);
+  	snprintf(buffer, bufferLength, "if %s {%s} else {%s}\n", ifCondition, ifBlock, elseBlock);
 
   	//Free what's uneeded
   	free(ifCondition);
@@ -210,6 +211,7 @@ char *
 operationTranslator(Token *token) {
   //We only call this function if we know the type, so we can safely cast it
   OperationToken *castedToken = (OperationToken *)token;
+  size_t bufferLength;
 
   //We process the stuff to the left of the operator
   char *first = process(castedToken->first);
@@ -231,50 +233,34 @@ operationTranslator(Token *token) {
 
     VariableToken *castedFirstToken  = (VariableToken *)castedToken->first;
     VariableToken *castedSecondToken = (VariableToken *)castedToken->second;
-
-    if ((castedToken->second->type == STRING_TOKEN || (castedToken->second->type == VARIABLE_TOKEN && castedSecondToken->stored != NULL && castedSecondToken->stored->type == STRING_TOKEN))) {
-      const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("char* ") + 4;
+  
+    bufferLength = strlen(first) + strlen(op) + strlen(second) + 4;
       
-      buffer = malloc(bufferLenght);
-      if(buffer == NULL) {
-      	free(first);
-      	free(second);
-      	return NULL;
-      }
-    } else {
-      const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("int ") + 4;
-      
-      buffer = malloc(bufferLenght);
-      if(buffer == NULL) {
-      	free(first);
-      	free(second);
-      	return NULL;
-      }
+    buffer = malloc(bufferLength);
+    if(buffer == NULL) {
+    	free(first);
+     	free(second);
+     	return NULL;
     }
 
     //We add to buffer
-    strcat(buffer, first);
-    strcat(buffer, " ");
-    strcat(buffer, op);
-    strcat(buffer, " ");
-    strcat(buffer, second);
-    if (strcmp(castedToken->op, "=") != 0) strcat(buffer, ";");
+    snprintf(buffer, bufferLength, "%s %s %s", first, op, second);
 
     //We free what's uneeded
     free(first);
     free(second);
     return buffer;
   } else {
-    const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("()") + 1;
+    const size_t bufferLength = strlen(first) + strlen(op) + strlen(second) + strlen("()") + 3;
     
-    buffer = malloc(bufferLenght);
+    buffer = malloc(bufferLength);
     if(buffer == NULL) {
     	free(first);
     	free(second);
     	return NULL;
     }
 
-    snprintf(buffer, bufferLenght, "(%s%s%s)", first, op, second);
+    snprintf(buffer, bufferLength, "(%s %s %s)", first, op, second);
 
     free(first);
     free(second);
@@ -294,8 +280,8 @@ blockTranslator(Token *token) {
 char *
 emptyTranslator(Token *token) {
 
-  const size_t bufferLenght = strlen("\n") + 1;
-  char *buffer = malloc(bufferLenght);
+  const size_t bufferLength = strlen("\n") + 1;
+  char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
   	return NULL;
   }
@@ -313,13 +299,13 @@ negationTranslator(Token *token) {
   	return NULL;
   }
 
-  const size_t bufferLenght = strlen(expression) + strlen("(!)") + 1;
-  char *buffer = calloc(bufferLenght, sizeof(char));
+  const size_t bufferLength = strlen(expression) + strlen("(!)") + 1;
+  char *buffer = calloc(bufferLength, sizeof(char));
   if(buffer == NULL) {
   	free(expression);
   	return NULL;
   }
-  snprintf(buffer, bufferLenght, "(!%s)", expression);
+  snprintf(buffer, bufferLength, "(!%s)", expression);
 
   free(expression);
   return buffer;
@@ -335,13 +321,13 @@ returnTranslator(Token *token) {
   	return NULL;
   }
 
-  const size_t bufferLenght = strlen(expression) + strlen("return ;\n") + 1;
-  char *buffer = malloc(bufferLenght);
+  const size_t bufferLength = strlen(expression) + strlen("return ;\n") + 1;
+  char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
   	free(expression);
   	return NULL;
   }
-  snprintf(buffer, bufferLenght, "return %s;\n", expression);
+  snprintf(buffer, bufferLength, "return %s;\n", expression);
 
   free(expression);
   return buffer;
@@ -371,15 +357,15 @@ printTranslator(Token *token) {
   else
     printfParameter = "%d";
 
-  const size_t bufferLenght = strlen(expression) + strlen("printf('XX', );\n") + 1;
-  char *buffer = calloc(bufferLenght, sizeof(char));
+  const size_t bufferLength = strlen(expression) + strlen("printf('XX', );\n") + 1;
+  char *buffer = calloc(bufferLength, sizeof(char));
   if(buffer == NULL) {
   	free(p);
   	free(expression);
   	return NULL;
   }
 
-  snprintf(buffer, bufferLenght, "printf(\"%s\", %s);\n", printfParameter, expression);
+  snprintf(buffer, bufferLength, "printf(\"%s\", %s);\n", printfParameter, expression);
 
   free(p);
   free(expression);
@@ -404,9 +390,9 @@ calculateWhileTranslator(Token *token) {
   	return NULL;
   }
 
-  //Calculate lenght of buffer
-  const size_t bufferLenght = strlen(condition) + strlen(block) + strlen("while %s {%s}") + 1;
-  char *buffer = malloc(bufferLenght);
+  //Calculate length of buffer
+  const size_t bufferLength = strlen(condition) + strlen(block) + strlen("while %s {%s}") + 1;
+  char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
   	free(condition);
   	free(block);
@@ -414,7 +400,7 @@ calculateWhileTranslator(Token *token) {
   }
 
   //We copy to buffer
-  snprintf(buffer, bufferLenght, "while %s {%s}", condition, block);
+  snprintf(buffer, bufferLength, "while %s {%s}", condition, block);
 
   //We free uneeded strings
   free(condition);
@@ -426,7 +412,6 @@ calculateWhileTranslator(Token *token) {
 /* Translator for statement token */
 char *
 statementTranslator(Token *token) {
-  printf("IN STATEMENT_TRANSLATOR\n");
 	//We only call this function if we know the type, so we can safely cast it
   StatementToken *castedToken = (StatementToken *)token;
 
@@ -437,16 +422,16 @@ statementTranslator(Token *token) {
   	return NULL;
   }
 
-  //Aside from the lenght of the statement we need space for the new line and the NULL
-  const size_t bufferLenght = strlen(statement) + strlen(";\n") + 1;
+  //Aside from the length of the statement we need space for the new line and the NULL
+  const size_t bufferLength = strlen(statement) + strlen(";\n") + 1;
   //We create an initial buffer to save our translated code to
-  char *buffer 							= malloc(bufferLenght);
+  char *buffer 							= malloc(bufferLength);
   if(buffer == NULL) {
   	//TODO: See how to best manage this errors
   	return NULL;
   }
   //We copy to buffer
-  snprintf(buffer, bufferLenght, "%s;\n", statement);
+  snprintf(buffer, bufferLength, "%s;\n", statement);
 
   //We no longer need the statement string so we free it
   free(statement);
