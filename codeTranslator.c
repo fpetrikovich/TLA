@@ -42,7 +42,7 @@ variableTranslator(Token *token) {
   char *dataType;
 
   if (variable->declared == 0) {
-    if (variable->basicInfo.dataType == STRING_TOKEN) {
+    if (variable->basicInfo.dataType == DATA_STRING) {
       length += strlen("char *");
       dataType = "char *";
     } else {
