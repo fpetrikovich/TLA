@@ -247,9 +247,9 @@ assign_operation:
 
 
  math_block:
- 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+ 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES
  	  	{ $$ = (Token *)createSigmaPiToken(SUMMATION_TYPE, $3); check($$); }
- 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+ 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES
  	  	{ $$ = (Token *)createSigmaPiToken(PRODUCTION_TYPE, $3); check($$); }
  	;
 
@@ -291,7 +291,9 @@ check(Token * token) {
         	break;
        	default:
        	    if (token->basicInfo.dataType == DATA_NULL) {
-       	    	yyerror(&code, "Incorrect type in assignment or operation");
+       	    	printf("%s\n", "INVALIDDDDD");
+       	    	exit(EXIT_FAILURE);
+       	    	//yyerror(&code, "Incorrect type in assignment or operation");
        	    }
        	    break;
     }
@@ -317,6 +319,7 @@ main(void) {
 		printf("#include <stdio.h>\n");
 		printf("#include <stdlib.h>\n\n");
 		printf("int main(int argc, char const *argv[]) {\n");
+		printf("int aux;\n");			/* Necessary for summation and production */
 		printf("%s\n", translation);
 		printf("\nreturn 0;\n}");
 	}

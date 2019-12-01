@@ -44,7 +44,10 @@ char *
 statementListTranslator(Token *token);
 
 char *
-SlopeTranslator(Token *token);
+sigmaPiTranslator(Token *token);
+
+char *
+slopeTranslator(Token *token);
 
 static char *
 process(Token *token);

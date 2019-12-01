@@ -487,7 +487,7 @@ singleOperationTranslator(Token *token) {
 }
 
 char *
-SlopeTranslator(Token *token) {
+slopeTranslator(Token *token) {
   SlopeToken *sToken = (SlopeToken *)token;
   char *coord1 = process(sToken->coord1);
   char *coord2 = process(sToken->coord2);
@@ -505,7 +505,51 @@ SlopeTranslator(Token *token) {
   free(coord1);
   free(coord2);
   return buffer;
-  
+}
+
+char * 
+changeAssignmentToLessThanOrEqualTo(char *string) {
+  ssize_t length = strlen(string) + 1;
+  char *newString = malloc(length);
+  snprintf(newString, length, "%s", string);
+
+  /* Works because there is an empty space between the variables and the = */
+  for (int i = 0; i < length; i++){
+    if (string[i] == '='){
+      newString[i - 1] = '<';
+    }
+  }
+  free(string);
+  return newString;
+}
+
+char *
+sigmaPiTranslator(Token *token) {
+  SigmaPiToken          *castedToken = (SigmaPiToken *)token;
+  SigmaPiConditionToken *condToken   = (SigmaPiConditionToken *)castedToken->condition;
+  OperationToken        *startNum    = (OperationToken *)condToken->initNum;
+  OperationToken        *finalNum    = (OperationToken *)condToken->finalNum;
+
+  /* Defining the limits of the variable we will iterate through */
+  char *auxVariable     = "aux = 0;";  // Where the result will be saved
+  char *variable        = process((Token *)startNum->first);
+  char *startAssignment = process((Token *)startNum);
+  char *endAssignment   = process((Token *)finalNum);
+  char *expression = process((Token *)condToken->expression);
+
+  endAssignment = changeAssignmentToLessThanOrEqualTo(endAssignment);
+
+  ssize_t bufferLength = strlen(auxVariable) + (strlen(variable) + 2) + strlen(startAssignment) + strlen(endAssignment) +strlen(expression) + strlen("\nfor(;;) {\naux+=;\n}\n");
+  char *buffer = malloc(bufferLength);
+
+  snprintf(buffer, bufferLength, "%s\nfor(%s;%s;%s++){\naux+=%s;\n}\n", auxVariable, startAssignment, endAssignment, variable, expression);
+
+  free(variable);
+  free(startAssignment);
+  free(endAssignment);
+  free(expression);
+
+  return buffer;
 }
 
 /* Token processing function
@@ -566,8 +610,11 @@ process(Token *token) {
   	case BLOCK_TOKEN:
   		returnValue = blockTranslator(token);
   		break;
+    case SIGMA_PI_TOKEN:
+      returnValue = sigmaPiTranslator(token);
+      break;
     case SLOPE_TOKEN:
-      returnValue = SlopeTranslator(token);
+      returnValue = slopeTranslator(token);
   }
   //Return the translation of the token
   return returnValue;

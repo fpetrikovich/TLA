@@ -319,6 +319,7 @@ freeCalculateWhileToken(Token *token) {
 OperationToken *
 createOperationToken(const Token *first,const char *oper,const Token *second) {
   //First we allocate memory
+  printf("IN OPERATION_TOKEN\n");
   OperationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
@@ -461,6 +462,7 @@ freeConstantToken(Token *token) {
 /* Creates a token for a variable */
 VariableToken *
 createVariableToken(const char *var) {
+  printf("IN VARIABLE_TOKEN = %s\n", var);
   VariableToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
