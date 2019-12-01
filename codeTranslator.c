@@ -544,8 +544,6 @@ process(Token *token) {
   	case CONSTANT_TOKEN:
   		returnValue = constantTranslator(token);
   		break;
-  	case INTEGER_TOKEN:
-  	case DOUBLE_TOKEN:
   	case FUNCTION_TOKEN:
   	case COORDINATES_TOKEN:
   		//TODO

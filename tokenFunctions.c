@@ -95,7 +95,7 @@ freeStatementList(Token *token) {
   if(token != NULL) {
     TokenList *castedToken = (TokenList *)token;
     freeToken(castedToken->current);
-    freeToken(castedToken->next);
+    freeToken((Token *)castedToken->next);
     free(token);
   }
 }
@@ -118,7 +118,7 @@ void
 freeBlockToken(Token *token) {
   if(token != NULL) {
     BlockToken *castedToken = (BlockToken *)token;
-    freeToken(castedToken->statements);
+    freeToken((Token *)castedToken->statements);
     free(token);
   }
 }
@@ -212,7 +212,7 @@ freeIfToken(Token *token) {
 CalculateWhileToken *
 createCalculateWhileToken(const Token *condition, const Token *block) {
   //First we allocate memory
-  WhileToken *token = malloc(sizeof *token);
+  CalculateWhileToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
   token->type       = WHILE_TOKEN;
@@ -294,7 +294,7 @@ createSingleOperationToken(const Token *operand, const char *oper) {
 
     token->type     = SINGLE_OPERATION_TOKEN;
     if(operand->dataType != DATA_NUMBER) {
-      token->dataType = DATA_NULL
+      token->dataType = DATA_NULL;
     } else {
       token->dataType = operand->dataType;
     }
