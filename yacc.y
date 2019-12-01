@@ -110,12 +110,12 @@ statement:
 // 	;
 
 main:
-	  START instructions END { *code = createStatementList($2); $$ = *code; check((Token *)$$);}
+	  START instructions END { *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
 	| START END		  		 { *code = NULL; $$ = *code; }
 
 instructions:
-	  block			      { $$ = (Token *)createStatementList($1); check($$); }
-	| instructions block  { $$ = (Token *)addStatement($1, $2); check($$); }
+	  block			      { $$ = createStatementList($1); check((Token *)$$); }
+	| instructions block  { $$ = addStatement($1, $2); check((Token *)$$); }
 	;
 
 block:
