@@ -3,7 +3,7 @@
 %}
 
 digit		[0-9]
-decimal		-?{digit}+\.{digit}+
+number		-?{digit}+
 variable 	[a-zA-Z][a-zA-Z0-9]*
 coordinates \(-?[0-9]+,-?[0-9]+\)
 new_line 	\n
@@ -56,7 +56,7 @@ new_line 	\n
 "string"				return STRING;	
 "function"				return FUNCTION; //NO SE SI VA ESTA?
 
-{decimal} 				{ strcpy(yylval.string, yytext); return NUMBER; }
+{number} 				{ strcpy(yylval.string, yytext); return NUMBER; }
 {coordinates} 			{ strcpy(yylval.string, yytext); return STRING; }
 {variable} 				{ strcpy(yylval.string, yytext); return VAR;    }
 {new_line} 				{ yylineno++; return NEW_LINE; }

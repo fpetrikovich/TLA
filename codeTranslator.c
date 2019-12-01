@@ -210,8 +210,8 @@ operationTranslator(Token *token) {
     //We find the variable its refering to, if it doesn't exist we just create it
     VariableToken *variable = createOrFindVariable(((VariableToken *)castedToken->first)->name);
 
-    VariableToken *castedFirstToken  = castedToken->first;
-    VariableToken *castedSecondToken = castedToken->second;
+    VariableToken *castedFirstToken  = (VariableToken *)castedToken->first;
+    VariableToken *castedSecondToken = (VariableToken *)castedToken->second;
 
     if ((castedToken->second->type == STRING_TOKEN || (castedToken->second->type == VARIABLE_TOKEN && castedSecondToken->stored != NULL && castedSecondToken->stored->type == STRING_TOKEN))) {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("char* ") + 4;
@@ -238,11 +238,10 @@ operationTranslator(Token *token) {
       	return NULL;
       }
 
-      if (variable->definida == 0) {
+      if (variable->declared == 0) {
         snprintf(buffer, bufferLenght, "int ");
+        variable->declared = 1;
       }
-      
-      variable->type = CONSTANT_TOKEN;
     }
 
     //We add to buffer
@@ -357,7 +356,7 @@ printTranslator(Token *token) {
   }
   strcpy(p, expression);
 
-  variableInfo *variable = findVariable(p);
+  VariableToken *variable = createOrFindVariable(p);
 
   if (variable->type == STRING_TOKEN)
     printfParameter = "%s";
