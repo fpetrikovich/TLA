@@ -57,9 +57,9 @@ TokenList *code;
 
 /* Token will be saved in the member
  * in the union */
-%type <list> braces instructions main
+%type <list> instructions main
 %type <token> type func_type block if_block loop_block /*math_block slope_block */declaration
-%type <token> print_block return_block statement variable
+%type <token> print_block return_block statement variable braces
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
@@ -129,8 +129,8 @@ block:
 	;
 
 braces:
-	  OPEN_BRACES CLOSE_BRACES				{ $$ = (Token *)createStatementList(NULL); check($$); }
-	| OPEN_BRACES block CLOSE_BRACES { $$ = (Token *)$2; }
+	  OPEN_BRACES CLOSE_BRACES				{ $$ = NULL; }
+	| OPEN_BRACES block CLOSE_BRACES 		{ $$ = (Token *)$2; }
 	;
 
 if_block:
