@@ -305,5 +305,4 @@ main(void) {
 
 	freeToken((Token *) code);
 	return 0;
-
 }
