@@ -90,7 +90,7 @@ declaration:
  	| STRING_TYPE VAR 					 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_STRING); check($$);} 	
  	| declaration ASSIGN expression  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
- 	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
+    | declaration ASSIGN math_block  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
  	// | function_declaration
 
 // function_declaration:
@@ -121,7 +121,10 @@ block:
 	| if_block 			{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
 	| loop_block		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
 	| statement 		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }				//Check this action
-	| block block 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} }
+	| block braces 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block if_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block loop_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block statement 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
 //	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 

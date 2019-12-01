@@ -174,13 +174,7 @@ SigmaPiConditionToken *
 createSigmaPiCondtionToken (const Token *initNum, const Token *expr, const Token *finalNum) {
   printf("IN CONDITION TOKEN\n");
   SigmaPiConditionToken *token = malloc(sizeof *token);
-  if(!isValid(token)) return NULL;
 
-  /* Invalid limits set */
-  if (initNum->basicInfo.dataType != DATA_NUMBER || finalNum->basicInfo.dataType != DATA_NUMBER) {
-    token->basicInfo.dataType = DATA_NULL;
-    return token;
-  }
   token->basicInfo.type     = SIGMA_PI_COND_TOKEN;
   token->basicInfo.dataType = DATA_NUMBER;
   token->initNum            = (Token *)initNum;
@@ -238,6 +232,29 @@ freeSigmaPiConditionToken(Token * token){
     freeToken(castedToken->initNum);
     freeToken(castedToken->expression);
     freeToken(castedToken->finalNum);
+    free(token);
+  }
+}
+
+SlopeToken *
+createSlopeToken(Token * coord1, Token * coord2){
+  SlopeToken *token = malloc(sizeof * token);
+  if(!isValid(token)) return NULL;
+  if(coord1->basicInfo.type != COORDINATES_TOKEN || coord2->basicInfo.type != COORDINATES_TOKEN){
+    token->basicInfo.dataType = DATA_NULL;
+  }
+  token->basicInfo.type = CONSTANT_TOKEN;
+  token->coord1         = coord1;
+  token->coord2         = coord2;
+  return token;
+}
+
+void
+freeSlopeToken(Token * token){
+  if(token != NULL) {
+    SlopeToken *castedToken = (SlopeToken *)token;
+    freeToken(castedToken->coord1);
+    freeToken(castedToken->coord2);
     free(token);
   }
 }
@@ -555,6 +572,8 @@ createPrintToken(Token *expression) {
 void
 freePrintToken(Token *token) {
   if(token != NULL) {
+    PrintToken *castedToken = (PrintToken *)token;
+    freeToken(castedToken->expression);
     free(token);
   }
 }
@@ -614,6 +633,9 @@ freeToken(Token *token) {
         break;
       case SIGMA_PI_COND_TOKEN:
         freeSigmaPiConditionToken(token);
+        break;
+      case SLOPE_TOKEN:
+        freeSlopeToken(token);
         break;
       default:
         printf("Something went wrong, this token has no valid type\n");

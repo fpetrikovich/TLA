@@ -94,6 +94,9 @@ createSigmaPiConditionToken (const Token *initNum,
 							 const Token *expression,
 							 const Token *finalNum);
 
+SlopeToken *
+createSlopeToken			(Token *coord1, Token* coord2);
+
 /* Free's a token */
 void
 freeToken					(Token *token);

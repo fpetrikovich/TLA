@@ -21,7 +21,8 @@ typedef enum {  NULL_TOKEN = 1,
                 VARIABLE_TOKEN,
                 BLOCK_TOKEN,
                 SIGMA_PI_TOKEN,
-                SIGMA_PI_COND_TOKEN
+                SIGMA_PI_COND_TOKEN,
+                SLOPE_TOKEN
 } TokenType;
 
 typedef enum {  DATA_NODATA = 1,
@@ -150,4 +151,17 @@ typedef struct SigmaPiConditionToken {
   Token      *expression;      //Token of the condition number
   Token      *finalNum;        //Token of the final number
 } SigmaPiConditionToken;
+
+typedef struct CoordinatesToken {
+  BasicInfo   basicInfo;
+  Token      *constant1;
+  Token      *constant2;
+} CoordinatesToken;
+
+typedef struct SlopeToken {
+  BasicInfo   basicInfo;
+  Token       *coord1;
+  Token       *coord2;
+} SlopeToken;
+
 #endif
