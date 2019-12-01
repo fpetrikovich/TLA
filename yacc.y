@@ -89,7 +89,7 @@ statement:
 	;
 
  declaration:
- 	  type VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = (Token *)castVariable($$, $1); check($$);} 	
+ 	  type VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, $1); check($$);} 	
  	| declaration ASSIGN expression  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
@@ -111,7 +111,7 @@ statement:
 
 main:
 	  START instructions END { *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
-	| START END		  		 { *code = NULL; $$ = *code; check((Token *)$$); }
+	| START END		  		 { *code = NULL; $$ = *code; }
 
 instructions:
 	  block			      { $$ = createStatementList($1); check((Token *)$$); }
@@ -125,7 +125,7 @@ block:
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
 	| statement 		{ $$ = (Token *)createStatementToken($1); check($$); }
-	| NEW_LINE 			{ $$ = (Token *)createEmptyToken(); check($$); }
+	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 
 braces:
