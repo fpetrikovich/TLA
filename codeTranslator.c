@@ -102,7 +102,7 @@ ifTranslator(Token *token) {
   //Translate parts of the if to C
   ifCondition = process(castedToken->ifCondition);
   if(ifCondition == NULL) {
-  	return NULL;
+    return NULL;
   }
   if(ifBlock == NULL) {
   	free(ifCondition);
@@ -192,6 +192,12 @@ ifTranslator(Token *token) {
   	free(ifBlock);
   	free(elifCondition);
   	free(elifBlock);
+  } else if(castedToken->elifBlock == NULL && castedToken->elifCondition == NULL && castedToken->elseBlock == NULL && castedToken->ifCondition != NULL){
+    //Just if
+    snprintf(buffer, bufferLength, "if %s {%s}\n", ifCondition, ifBlock);
+    //free what's uneeded
+    free(ifBlock);
+    free(ifCondition);
   } else {
   	//Just if and else
   	snprintf(buffer, bufferLength, "if %s {%s} else {%s}\n", ifCondition, ifBlock, elseBlock);
