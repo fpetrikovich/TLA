@@ -235,7 +235,7 @@ freeCalculateWhileToken(Token *token) {
 
 /* Creates an operation token */
 OperationToken *
-createOperationToken(const Token *first, const Token *second, const char *oper) {
+createOperationToken(const Token *first,const char *oper,const Token *second) {
   //First we allocate memory
   OperationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
