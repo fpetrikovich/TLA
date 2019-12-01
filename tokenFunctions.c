@@ -30,12 +30,12 @@ createOrFindVariable(const char *name) {
 
 Token *
 castVariable(Token *variable, DataType dataType) {
-  if(variable->dataType != DATA_NEW){
+  if(variable->basicInfo.dataType != DATA_NEW){
     /* Already casted before --> redeclaration = error */
-    variable->dataType = DATA_NULL;
+    variable->basicInfo.dataType = DATA_NULL;
     return variable;
   }
-  variable->dataType = dataType;
+  variable->basicInfo.dataType = dataType;
   return variable;
 }
 
@@ -45,8 +45,8 @@ createToken(TokenType type, DataType dataType) {
     Token *token = malloc(sizeof *token);
     if(!isValid(token)) return NULL;
 
-    token->type     = type;
-    token->dataType = dataType;
+    token->basicInfo.type     = type;
+    token->basicInfo.dataType = dataType;
     return token;
 }
 
@@ -65,9 +65,9 @@ createStatementToken(Token *statement) {
   StatementToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
 
-  token->type       = STATEMENT_TOKEN;
-  token->statement  = statement;
-  token->dataType   = statement->dataType;
+  token->basicInfo.type       = STATEMENT_TOKEN;
+  token->statement            = statement;
+  token->basicInfo.dataType   = statement->basicInfo.dataType;
   return token;
 }
 
@@ -107,10 +107,10 @@ createStatementList(const Token *statement) {
   TokenList *list = malloc(sizeof *list);
   if(!isValid(list)) return NULL;
 
-  list->type      = STATEMENTS_TOKEN;
-  list->dataType  = statement->dataType;
-  list->current   = (Token *)statement;   //First statement on the list
-  list->next      = NULL;
+  list->basicInfo.type      = STATEMENTS_TOKEN;
+  list->basicInfo.dataType  = statement->basicInfo.dataType;
+  list->current             = (Token *)statement;   //First statement on the list
+  list->next                = NULL;
   return list;
 }
 
@@ -132,8 +132,8 @@ createBlockToken(const TokenList *statements) {
   BlockToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type       = BLOCK_TOKEN;
-  token->dataType   = statements->dataType;
+  token->basicInfo.type       = BLOCK_TOKEN;
+  token->basicInfo.dataType   = statements->basicInfo.dataType;
   token->statements = (TokenList *)statements;
   return token;
 }
@@ -153,10 +153,10 @@ SummationToken *
 createSummationToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
   SummationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
-  if(initNum->dataType != DATA_NUMBER || finalNum->dataType != DATA_NUMBER){
-    token->dataType = DATA_NULL;
+  if(initNum->basicInfo.dataType != DATA_NUMBER || finalNum->basicInfo.dataType != DATA_NUMBER){
+    token->basicInfo.dataType = DATA_NULL;
   }
-  token->type           = SUMMATION_TOKEN;
+  token->basicInfo.type           = SUMMATION_TOKEN;
   token->initNum        = (Token *)initNum;
   token->condition      = (Token *)condition;
   token->finalNum       = (Token *)finalNum;
@@ -179,10 +179,10 @@ ProductionToken *
 createProductionToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
   ProductionToken *token = malloc(sizeof * token);
   if(!isValid(token)) return NULL;
-  if(initNum->type != CONSTANT_TOKEN || finalNum  ->type != CONSTANT_TOKEN){
-    token->dataType = DATA_NULL;
+  if(initNum->basicInfo.type != CONSTANT_TOKEN || finalNum  ->basicInfo.type != CONSTANT_TOKEN){
+    token->basicInfo.dataType = DATA_NULL;
   }
-  token->type           = PRODUCTION_TOKEN;
+  token->basicInfo.type           = PRODUCTION_TOKEN;
   token->initNum        = (Token *)initNum;
   token->condition      = (Token *)condition;
   token->finalNum       = (Token *)finalNum;
@@ -209,8 +209,8 @@ createIfToken(const Token *ifCondition, const Token *ifBlock, const Token *elifC
   IfToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type           = IF_TOKEN;
-  token->dataType       = DATA_NODATA;
+  token->basicInfo.type           = IF_TOKEN;
+  token->basicInfo.dataType       = DATA_NODATA;
   token->ifCondition    = (Token *)ifCondition;
   token->ifBlock        = (Token *)ifBlock;
   token->elifCondition  = (Token *)elifCondition;
@@ -240,8 +240,8 @@ createCalculateWhileToken(const Token *condition, const Token *block) {
   CalculateWhileToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type       = WHILE_TOKEN;
-  token->dataType   = DATA_NODATA;
+  token->basicInfo.type       = WHILE_TOKEN;
+  token->basicInfo.dataType   = DATA_NODATA;
   token->condition  = (Token *)condition;
   token->block      = (Token *)block;
   return token;
@@ -265,20 +265,20 @@ createOperationToken(const Token *first,const char *oper,const Token *second) {
   OperationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type     = OPERATION_TOKEN;
+  token->basicInfo.type     = OPERATION_TOKEN;
   token->first    = (Token *)first;
   token->second   = (Token *)second;
 
   //We have two possible data types, we make sure they match
-  if(first->dataType != second->dataType) {
+  if(first->basicInfo.dataType != second->basicInfo.dataType) {
       // Set the dataType as invalid
-      token->dataType = DATA_NULL;
+      token->basicInfo.dataType = DATA_NULL;
   } else {
     //If they match, the only operation permited to string is assignment
-    if(first->dataType == DATA_STRING && strcmp(oper, "=") != 0) {
-      token->dataType = DATA_NULL;
+    if(first->basicInfo.dataType == DATA_STRING && strcmp(oper, "=") != 0) {
+      token->basicInfo.dataType = DATA_NULL;
     } else {
-      token->dataType = first->dataType;
+      token->basicInfo.dataType = first->basicInfo.dataType;
     }
   }
 
@@ -313,11 +313,11 @@ createSingleOperationToken(const Token *operand, const char *oper) {
     SingleOperationToken *token = malloc(sizeof *token);
     if(!isValid(token)) return NULL;
 
-    token->type     = SINGLE_OPERATION_TOKEN;
-    if(operand->dataType != DATA_NUMBER) {
-      token->dataType = DATA_NULL;
+    token->basicInfo.type     = SINGLE_OPERATION_TOKEN;
+    if(operand->basicInfo.dataType != DATA_NUMBER) {
+      token->basicInfo.dataType = DATA_NULL;
     } else {
-      token->dataType = operand->dataType;
+      token->basicInfo.dataType = operand->basicInfo.dataType;
     }
     token->operand  = (Token *)operand;
     token->op       = calloc(3, sizeof(char)); /* 2 for the operation and 1 for the 0 */
@@ -348,8 +348,8 @@ createStringToken(const char *string) {
   StringToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type     = STRING_TOKEN;
-  token->dataType = DATA_STRING;
+  token->basicInfo.type     = STRING_TOKEN;
+  token->basicInfo.dataType = DATA_STRING;
   token->string   = calloc(strlen(string) + 1, sizeof(char));
   
   if(!isValid(token->string)) {
@@ -378,8 +378,8 @@ createConstantToken(const char *constant) {
   ConstantToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type     = CONSTANT_TOKEN;
-  token->dataType = DATA_NUMBER;
+  token->basicInfo.type     = CONSTANT_TOKEN;
+  token->basicInfo.dataType = DATA_NUMBER;
   token->constant = calloc(strlen(constant) + 1, sizeof(char));
   
   if(!isValid(token->constant)) {
@@ -407,8 +407,8 @@ createVariableToken(const char *var) {
   VariableToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type     = VARIABLE_TOKEN;
-  token->dataType = DATA_NEW;
+  token->basicInfo.type     = VARIABLE_TOKEN;
+  token->basicInfo.dataType = DATA_NEW;
   token->declared = 0;
   token->name     = calloc(strlen(var) + 1, sizeof(char));
   
@@ -437,8 +437,8 @@ createReturnToken(const Token *expression) {
   ReturnToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type       = RETURN_TOKEN;
-  token->dataType   = expression->dataType;
+  token->basicInfo.type       = RETURN_TOKEN;
+  token->basicInfo.dataType   = expression->basicInfo.dataType;
   token->expression = (Token *)expression;
   return token;
 }
@@ -457,8 +457,8 @@ createEmptyToken() {
   Token *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type     = NULL_TOKEN;
-  token->dataType = DATA_NODATA;
+  token->basicInfo.type     = NULL_TOKEN;
+  token->basicInfo.dataType = DATA_NODATA;
   return token;
 }
 
@@ -476,11 +476,11 @@ createNegationToken(Token *expression) {
   NegationToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type       = NEGATION_TOKEN;
-  if(expression->dataType == DATA_NUMBER) {
-    token->dataType = expression->dataType;
+  token->basicInfo.type       = NEGATION_TOKEN;
+  if(expression->basicInfo.dataType == DATA_NUMBER) {
+    token->basicInfo.dataType = expression->basicInfo.dataType;
   } else {
-    token->dataType = DATA_NULL;
+    token->basicInfo.dataType = DATA_NULL;
   }
   token->expression = expression;
   return token;
@@ -500,11 +500,11 @@ createPrintToken(Token *expression) {
   PrintToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
-  token->type       = PRINT_TOKEN;
-  if(expression->dataType == DATA_STRING || expression->dataType == DATA_NUMBER) {
-    token->dataType = expression->dataType;
+  token->basicInfo.type       = PRINT_TOKEN;
+  if(expression->basicInfo.dataType == DATA_STRING || expression->basicInfo.dataType == DATA_NUMBER) {
+    token->basicInfo.dataType = expression->basicInfo.dataType;
   } else {
-    token->dataType = DATA_NULL;
+    token->basicInfo.dataType = DATA_NULL;
   }
   token->expression = expression;
   return token;
@@ -522,7 +522,7 @@ freePrintToken(Token *token) {
 void
 freeToken(Token *token) {
   if(token != NULL) {
-    switch(token->type) {
+    switch(token->basicInfo.type) {
       case NULL_TOKEN:
         freeEmptyToken(token);
         break;

@@ -281,14 +281,14 @@ check(Token * token) {
 
 	/* Must check that the type is correct (NULL = error):
 	 * Operation and assignment must have matching types */
-	switch(token->type) {
+	switch(token->basicInfo.type) {
         case IF_TOKEN:
         case WHILE_TOKEN:
         case NULL_TOKEN:
         	// Has no dataType field
         	break;
        	default:
-       	    if (token->dataType == DATA_NULL) {
+       	    if (token->basicInfo.dataType == DATA_NULL) {
        	    	yyerror(&code, "Incorrect type in assignment or operation");
        	    }
        	    break;

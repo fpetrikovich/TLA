@@ -42,7 +42,7 @@ variableTranslator(Token *token) {
   char *dataType;
 
   if (variable->declared == 0) {
-    if (variable->dataType == STRING_TOKEN) {
+    if (variable->basicInfo.dataType == STRING_TOKEN) {
       length += strlen("char *");
       dataType = "char *";
     } else {
@@ -50,17 +50,17 @@ variableTranslator(Token *token) {
       dataType = "int ";
     }
   }
-  length += strlen(name) + strlen("_") + 1;
+  length += strlen(name) + 1;
 
   char *newVariable = malloc(length);
   if(newVariable == NULL) {
     return NULL;
   }
   if (variable->declared == 0){
-    snprintf(newVariable, length, "%s%s_", dataType, name);
+    snprintf(newVariable, length, "%s%s", dataType, name);
   } else {
     // printf("name = %s\n", name);
-    snprintf(newVariable, length, "%s_", name);
+    snprintf(newVariable, length, "%s", name);
   }
   variable->declared = 1;
 
@@ -209,7 +209,7 @@ operationTranslator(Token *token) {
   char *op = castedToken->op;
   char *buffer;
 
-  if (castedToken->first->type == VARIABLE_TOKEN && strcmp(castedToken->op, "=") == 0 || strcmp(castedToken->op, "+=") == 0 || strcmp(castedToken->op, "-=") == 0 || strcmp(castedToken->op, "/=") == 0 || strcmp(castedToken->op, "*=") == 0) {
+  if (castedToken->first->basicInfo.type == VARIABLE_TOKEN && strcmp(castedToken->op, "=") == 0 || strcmp(castedToken->op, "+=") == 0 || strcmp(castedToken->op, "-=") == 0 || strcmp(castedToken->op, "/=") == 0 || strcmp(castedToken->op, "*=") == 0) {
     //We find the variable its refering to, if it doesn't exist we just create it
     VariableToken *variable = createOrFindVariable(((VariableToken *)castedToken->first)->name);
 
@@ -326,9 +326,9 @@ printTranslator(Token *token) {
   char *printfParameter;
 
 
-  if(castedToken->dataType == DATA_STRING) {
+  if(castedToken->basicInfo.dataType == DATA_STRING) {
     printfParameter = "%s";
-  } else if(castedToken->dataType == DATA_NUMBER) {
+  } else if(castedToken->basicInfo.dataType == DATA_NUMBER) {
     printfParameter = "%d";
   } else {
     //Unsupported
@@ -498,7 +498,7 @@ process(Token *token) {
   }
 
   //Translate it according to the type
-  switch(token->type) {
+  switch(token->basicInfo.type) {
   	case NULL_TOKEN:
   		returnValue = emptyTranslator(token);
   		break;

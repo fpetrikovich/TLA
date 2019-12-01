@@ -34,24 +34,27 @@ typedef enum {  DATA_NODATA = 1,
 
 /* Token structures that hold the token information */
 
-/* Basic token */
-typedef struct Token {
+/* Shared struct */
+typedef struct basicInfo {
   TokenType   type;
   DataType    dataType;
+} BasicInfo;
+
+/* Basic token */
+typedef struct Token {
+  BasicInfo   basicInfo;
 } Token;
 
 /* List of tokens */
 typedef struct TokenList {
-  TokenType          type;
-  DataType           dataType;
+  BasicInfo          basicInfo;
   Token              *current;
   struct TokenList   *next;
 } TokenList;
 
 /* Token for operations */
 typedef struct OperationToken {
-  TokenType type;     //OPERATION_TOKEN
-  DataType  dataType; 
+  BasicInfo   basicInfo; 
   Token     *first;   //What's left of the operator
   Token     *second;  //What's right of the operator
   char      *op;      //The operator symbol
@@ -59,46 +62,40 @@ typedef struct OperationToken {
 
 /* Token for singular operations like X++ */
 typedef struct SingleOperationToken {
-  TokenType type;     //SINGLE_OPERATION_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *operand; //What's being modified
   char      *op;      //The operator
 } SingleOperationToken; 
 
 /* Token for a return statement */
 typedef struct ReturnToken {
-  TokenType type;        //RETURN_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *expression;  //Expression to return
 } ReturnToken;
 
 /* Token for constant values */
 /* For numbers --> double and integer */
 typedef struct ConstantToken {
-  TokenType type;     //CONSTANT_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   char      *constant;   //Constant value
 } ConstantToken;
 
 /* Token for handling variables */
 typedef struct VariableToken {
-  TokenType type;     //VARIABLE_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   int       declared; //Is it being declared or not?
   char      *name;    //Name of the variable
 } VariableToken;
 
 /* Token for printing */
 typedef struct PrintToken {
-  TokenType type;         //PRINT_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *expression;  //Expression to be printed
 } PrintToken;
 
 /* Token for if statement */
 typedef struct IfToken {
-  TokenType type;           //IF_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *ifCondition;   //Condition to be accepted
   Token     *ifBlock;       //Token with the information of what to do if it passes
   Token     *elifCondition; //Other condition to be accepted
@@ -108,51 +105,44 @@ typedef struct IfToken {
 
 /* Token for a calculate while loop */
 typedef struct CalculateWhileToken {
-  TokenType type;         //WHILE_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *block;       //Block token with the statements to execute
   Token     *condition;   //Condition to continue looping
 } CalculateWhileToken;
 
 /* Token for a block of code */
 typedef struct BlockToken {
-  TokenType   type;           //BLOCK_TOKEN
-  DataType    dataType;
+  BasicInfo   basicInfo;
   TokenList   *statements;    //Statements
 } BlockToken;
 
 /* Token for a string */
 typedef struct StringToken {
-  TokenType type;           //STRING_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   char      *string;        //String value
 } StringToken;
 
 /* For a single statement */
 typedef struct StatementToken {
-  TokenType type;           //STATEMENT_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *statement;     //Token that's being stated
 } StatementToken;
 
 /* For the NOT_OP expressions */
 typedef struct NegationToken {
-  TokenType type;              //NEGATION_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *expression;        //Token of the expression being negated
 } NegationToken;
 
 typedef struct SummationToken {
-  TokenType type;             //CONSTANT_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *initNum;         //Token of the initial number
   Token     *condition;       //Token of the condition number
   Token     *finalNum;        //Token of the final number
 } SummationToken;
 
 typedef struct ProductionToken {
-  TokenType type;             //CONSTANT_TOKEN
-  DataType  dataType;
+  BasicInfo   basicInfo;
   Token     *initNum;         //Token of the initial number
   Token     *condition;       //Token of the condition number
   Token     *finalNum;        //Token of the final number
