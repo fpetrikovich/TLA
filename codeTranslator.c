@@ -480,6 +480,7 @@ statementListTranslator(Token *token) {
     char *newBuffer = realloc(buffer, strlen(newCode) + strlen(buffer) + 1);
     if (newBuffer == NULL) {
     	//TODO: See how to best manange this errors
+      free(newCode);
     	free(buffer);
     	return NULL;
     }
