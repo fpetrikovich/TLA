@@ -120,7 +120,8 @@ ifTranslator(Token *token) {
   		return NULL;
   	}
   }
-
+  
+  ifBlock = process(castedToken->ifBlock);
   //We calculate the buffer length, there are three different cases
   //The base length is:
  	size_t bufferLength = strlen(ifCondition) + strlen(ifBlock) + strlen("if %s {%s}") + 2;	//+2 cuz i consider a \n as well
