@@ -83,6 +83,7 @@ statement:
 	| assign_operation SEMI_COLON   { $$ = $1; }
 	| one_operation SEMI_COLON      { $$ = $1; }
 	| expression SEMI_COLON         { $$ = $1; }
+	| print_block SEMI_COLON 		{ $$ = $1; }
 	;
 
  declaration:
@@ -147,7 +148,7 @@ loop_block:
 	;
 
 print_block:
-	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON { $$ = (Token *)createPrintToken($3); check($$); }
+	PRINT OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = (Token *)createPrintToken($3); check($$); }
 	;
 
 return_block:

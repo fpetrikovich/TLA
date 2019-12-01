@@ -390,7 +390,7 @@ createVariableToken(const char *var) {
   token->type     = VARIABLE_TOKEN;
   token->dataType = DATA_NEW;
   token->stored   = NULL;
-  token->declared = FALSE;
+  token->declared = 0;
   token->name     = calloc(strlen(var) + 1, sizeof(char));
   
   if(!isValid(token->name)) {

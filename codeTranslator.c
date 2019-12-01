@@ -59,13 +59,33 @@ constantTranslator(Token *token) {
 /* Translator for variable token */
 char *
 variableTranslator(Token *token) {
-  char *name = ((VariableToken *)token)->name;
-  char *newVariable = calloc(strlen(name) + strlen("_") + 1, sizeof(char));
-  if(newVariable == NULL) {
-  	return NULL;
+  printf("IN VARIABLE_TRANSLATOR\n");
+  VariableToken *variable = (VariableToken *)token;
+  char *name = variable->name;
+  int length = 0;
+  char *dataType;
+
+  if (variable->declared == 0) {
+    if (variable->dataType == STRING_TOKEN) {
+      length += strlen("char *");
+      dataType = "char *";
+    } else {
+      length += strlen("int ");
+      dataType = "int ";
+    }
   }
-  strcpy(newVariable, name);
-  strcat(newVariable, "_");
+  length += strlen(name) + strlen("_") + 1;
+
+  char *newVariable = calloc(length, sizeof(char));
+  if(newVariable == NULL) {
+    return NULL;
+  }
+  if (variable->declared == 0){
+    variable->declared = 1;
+    snprintf(newVariable, length, "%s%s_", dataType, name);
+  } else {
+    snprintf(newVariable, length, "%s_", name);
+  }
 
   return newVariable;
 }
@@ -250,7 +270,7 @@ operationTranslator(Token *token) {
     strcat(buffer, op);
     strcat(buffer, " ");
     strcat(buffer, second);
-    strcat(buffer, ";");
+    if (strcmp(castedToken->op, "=") != 0) strcat(buffer, ";");
 
     //We free what's uneeded
     free(first);
@@ -418,6 +438,7 @@ calculateWhileTranslator(Token *token) {
 /* Translator for statement token */
 char *
 statementTranslator(Token *token) {
+  printf("IN STATEMENT_TRANSLATOR\n");
 	//We only call this function if we know the type, so we can safely cast it
   StatementToken *castedToken = (StatementToken *)token;
 
