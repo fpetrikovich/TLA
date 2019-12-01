@@ -74,12 +74,15 @@ char *
 ifTranslator(Token *token) {
   IfToken *castedToken = (IfToken *)token;
 
+  //Declaration
+  char *ifCondition, *ifBlock, *elifCondition, *elifBlock, *elseBlock;
+
   //Translate parts of the if to C
-  char *ifCondition = process(castedToken->ifCondition);
+  ifCondition = process(castedToken->ifCondition);
   if(ifCondition == NULL) {
   	return NULL;
   }
-  char *ifBlock = process(castedToken->ifBlock);
+  ifBlock = process(castedToken->ifBlock);
   if(ifBlock == NULL) {
   	free(ifCondition);
   	return NULL;
@@ -87,14 +90,14 @@ ifTranslator(Token *token) {
 
   //Now the following three parts are optional, so they could be missing
   if(castedToken->elifCondition != NULL && castedToken->elifBlock != NULL) {
-  	char *elifCondition = process(castedToken->elifCondition);
+  	elifCondition = process(castedToken->elifCondition);
   	if(elifCondition == NULL) {
   		free(ifCondition);
   		free(ifBlock);
   		return NULL;
   	}
 
-  	char *elifBlock = process(castedToken->elifBlock);
+  	elifBlock = process(castedToken->elifBlock);
   	if (elifBlock == NULL) {
   		free(ifCondition);
   		free(ifBlock);
