@@ -148,59 +148,99 @@ freeBlockToken(Token *token) {
   }
 }
 
-/* Creates a summation token with delimiters ( num1 and num2 could be variables, )*/
-SummationToken *
-createSummationToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
-  SummationToken *token = malloc(sizeof *token);
-  if(!isValid(token)) return NULL;
-  if(initNum->basicInfo.dataType != DATA_NUMBER || finalNum->basicInfo.dataType != DATA_NUMBER){
-    token->basicInfo.dataType = DATA_NULL;
-  }
-  token->basicInfo.type           = SUMMATION_TOKEN;
-  token->initNum        = (Token *)initNum;
-  token->condition      = (Token *)condition;
-  token->finalNum       = (Token *)finalNum;
+SigmaPiToken *
+createSigmaPiToken(MathType type, const Token *condition) {
+  printf("IN HERE!\n");
+  SigmaPiToken *token = malloc(sizeof *token);
+  if (!isValid(token)) return NULL;
   
+  token->basicInfo.type     = SIGMA_PI_TOKEN;
+  token->basicInfo.dataType = condition->basicInfo.dataType;
+  token->mathType           = type;  
+  token->condition          = (Token *)condition;
   return token;
 }
 
 void
-freeSummationToken(Token * token){
+freeSigmaPiToken(Token * token){
   if(token != NULL) {
-    SummationToken *castedToken = (SummationToken *)token;
+    SigmaPiToken *castedToken = (SigmaPiToken *)token;
     freeToken(castedToken->condition);
-    freeToken(castedToken->initNum);
-    freeToken(castedToken->finalNum);
     free(token);
   }
 }
 
-ProductionToken *
-createProductionToken(const Token *initNum,const Token * condition ,const Token *finalNum) {
-  ProductionToken *token = malloc(sizeof * token);
+SigmaPiConditionToken *
+createSigmaPiCondtionToken (const Token *initNum, const Token *expr, const Token *finalNum) {
+  printf("IN CONDITION TOKEN\n");
+  SigmaPiConditionToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
-  if(initNum->basicInfo.type != CONSTANT_TOKEN || finalNum  ->basicInfo.type != CONSTANT_TOKEN){
-    token->basicInfo.dataType = DATA_NULL;
-  }
-  token->basicInfo.type           = PRODUCTION_TOKEN;
-  token->initNum        = (Token *)initNum;
-  token->condition      = (Token *)condition;
-  token->finalNum       = (Token *)finalNum;
 
-  return token;
+  /* Invalid limits set */
+  if (initNum->basicInfo.dataType != DATA_NUMBER || finalNum->basicInfo.dataType != DATA_NUMBER) {
+    token->basicInfo.dataType = DATA_NULL;
+    return token;
+  }
+  token->basicInfo.type     = SIGMA_PI_COND_TOKEN;
+  token->basicInfo.dataType = DATA_NUMBER;
+  token->initNum            = (Token *)initNum;
+  token->expression         = (Token *)expr;
+  token->finalNum           = (Token *)finalNum;
+  
+ return token;
+}
+
+int
+checkLimits(OperationToken *num1, OperationToken *num2) {
+  if (strcmp(num1->op, "=") != 0 || strcmp(num2->op, "=") != 0) {
+    return DATA_NULL;
+  }
+  /* Same variable was specified and numbers were assigned */
+  if (num1->first->basicInfo.type == VARIABLE_TOKEN && num2->first->basicInfo.type == VARIABLE_TOKEN) {
+    VariableToken *var1 = (VariableToken *)num1->first;
+    VariableToken *var2 = (VariableToken *)num2->first;
+
+    if( strcmp(var1->name, var2->name) == 0 
+    && num1->second->basicInfo.dataType == DATA_NUMBER 
+    && num2->second->basicInfo.dataType == DATA_NUMBER) {
+      return DATA_NUMBER;
+    }
+  }
+}
+
+SigmaPiConditionToken *
+createSigmaPiConditionToken (const Token *initNum, const Token *expr, const Token *finalNum) {
+  printf("IN CONDITION TOKEN\n");
+  SigmaPiConditionToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+
+  if (initNum->basicInfo.type != OPERATION_TOKEN || finalNum->basicInfo.type != OPERATION_TOKEN) {
+    token->basicInfo.dataType = DATA_NULL;
+    return token;
+  }
+
+  OperationToken *beginNum = (OperationToken *)initNum;
+  OperationToken *endNum   = (OperationToken *)finalNum;
+
+  token->basicInfo.dataType = checkLimits(beginNum, endNum);
+  token->basicInfo.type     = SIGMA_PI_COND_TOKEN;
+  token->initNum            = (Token *)initNum;
+  token->expression         = (Token *)expr;
+  token->finalNum           = (Token *)finalNum;
+  
+ return token;
 }
 
 void
-freeProductionToken(Token * token) {
+freeSigmaPiConditionToken(Token * token){
   if(token != NULL) {
-    ProductionToken *castedToken = (ProductionToken *)token;
-    freeToken(castedToken->condition);
+    SigmaPiConditionToken *castedToken = (SigmaPiConditionToken *)token;
     freeToken(castedToken->initNum);
+    freeToken(castedToken->expression);
     freeToken(castedToken->finalNum);
     free(token);
   }
 }
-
 
 /* Creates an if token */
 IfToken *
@@ -568,6 +608,12 @@ freeToken(Token *token) {
         break;
       case BLOCK_TOKEN:
         freeBlockToken(token);
+        break;
+      case SIGMA_PI_TOKEN:
+        freeSigmaPiToken(token);
+        break;
+      case SIGMA_PI_COND_TOKEN:
+        freeSigmaPiConditionToken(token);
         break;
       default:
         printf("Something went wrong, this token has no valid type\n");

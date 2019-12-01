@@ -58,7 +58,7 @@ TokenList *code;
 /* Token will be saved in the member
  * in the union */
 %type <list> instructions main
-%type <token> block if_block loop_block declaration /*math_block slope_block */
+%type <token> block if_block loop_block declaration math_block math_condition /*slope_block */
 %type <token> print_block return_block statement variable braces
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
@@ -239,22 +239,21 @@ assign_op:
 
 assign_operation:
 	  variable assign_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
-	// | variable assign_op math_block  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
+    | variable assign_op math_block  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 	// | variable assign_op slope_block { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 
 
-// math_block:
-// 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
-// 	| SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
-// 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
-// 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES braces SEMI_COLON
+ math_block:
+ 	  SUMMATION OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+ 	  	{ $$ = (Token *)createSigmaPiToken(SUMMATION_TYPE, $3); check($$); }
+ 	| PRODUCT OPEN_PARENTHESES math_condition CLOSE_PARENTHESES SEMI_COLON
+ 	  	{ $$ = (Token *)createSigmaPiToken(PRODUCTION_TYPE, $3); check($$); }
+ 	;
 
-// math_condition:
-// 	variable SEMI_COLON expression SEMI_COLON variable
-// 	NUMBER SEMI_COLON expression SEMI_COLON variable
-// 	variable SEMI_COLON expression SEMI_COLON NUMBER
-// 	NUMBER SEMI_COLON expression SEMI_COLON NUMBER	
-// 	;
+math_condition:
+	assign_operation SEMI_COLON expression SEMI_COLON assign_operation  				
+		{ $$ = (Token *)createSigmaPiConditionToken($1, $3, $5); check($$); }
+	;
 
 // slope_block:
 // 	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON

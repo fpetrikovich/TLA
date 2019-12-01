@@ -20,8 +20,8 @@ typedef enum {  NULL_TOKEN = 1,
                 COORDINATES_TOKEN,
                 VARIABLE_TOKEN,
                 BLOCK_TOKEN,
-                SUMMATION_TOKEN,
-                PRODUCTION_TOKEN
+                SIGMA_PI_TOKEN,
+                SIGMA_PI_COND_TOKEN
 } TokenType;
 
 typedef enum {  DATA_NODATA = 1,
@@ -31,6 +31,10 @@ typedef enum {  DATA_NODATA = 1,
                 DATA_STRING,
                 DATA_COORDINATES
 } DataType;
+
+typedef enum {  SUMMATION_TYPE,
+                PRODUCTION_TYPE
+} MathType;
 
 /* Token structures that hold the token information */
 
@@ -134,18 +138,16 @@ typedef struct NegationToken {
   Token     *expression;        //Token of the expression being negated
 } NegationToken;
 
-typedef struct SummationToken {
+typedef struct SigmaPiToken {
   BasicInfo   basicInfo;
-  Token     *initNum;         //Token of the initial number
-  Token     *condition;       //Token of the condition number
-  Token     *finalNum;        //Token of the final number
-} SummationToken;
+  MathType    mathType;
+  Token      *condition;
+} SigmaPiToken;
 
-typedef struct ProductionToken {
-  BasicInfo   basicInfo;
-  Token     *initNum;         //Token of the initial number
-  Token     *condition;       //Token of the condition number
-  Token     *finalNum;        //Token of the final number
-} ProductionToken;
-
+typedef struct SigmaPiConditionToken {
+  BasicInfo  basicInfo;
+  Token      *initNum;         //Token of the initial number
+  Token      *expression;      //Token of the condition number
+  Token      *finalNum;        //Token of the final number
+} SigmaPiConditionToken;
 #endif
