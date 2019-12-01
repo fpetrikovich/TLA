@@ -238,11 +238,10 @@ operationTranslator(Token *token) {
       	return NULL;
       }
 
-      if (variable->definida == 0) {
+      if (variable->declared == 0) {
         snprintf(buffer, bufferLenght, "int ");
+        variable->declared = 1;
       }
-      
-      variable->type = CONSTANT_TOKEN;
     }
 
     //We add to buffer
@@ -356,7 +355,7 @@ printTranslator(Token *token) {
   }
   strcpy(p, expression);
 
-  variableInfo *variable = findVariable(p);
+  VariableToken *variable = createOrFindVariable(p);
 
   if (variable->type == STRING_TOKEN)
     printfParameter = "%s";
