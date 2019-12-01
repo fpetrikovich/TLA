@@ -5,7 +5,7 @@ Creating our own programming language
 ## Compile yacc, lex and project
 Compile everything:
 ```
-chmod +x compiler.sh
+chmod +x compile.sh
 ./compile.sh
 ```
 
