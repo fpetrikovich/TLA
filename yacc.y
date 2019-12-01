@@ -50,7 +50,7 @@ TokenList *code;
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
 %token NUMBER_LITERAL NUMBER_TYPE FUNCTION COORDINATES VAR STRING_LITERAL STRING_TYPE
-%token NEW_LINE 
+//%token NEW_LINE 
 %token START END
 
 /* ---------------------------------------------
@@ -111,8 +111,8 @@ main:
 	| START END	  		 		{ *code = NULL; $$ = *code; }
 
 instructions:
-	  block			      { $$ = addStatement($$, $1); check((Token *)$$); }
-	| instructions block  { $$ = addStatement($1, $2); check((Token *)$$); }
+	  instructions block  { $$ = addStatement($1, $2); check((Token *)$$); }
+	| block			      { $$ = createStatementList($1); check((Token *)$$); }
 	;
 
 block:
@@ -122,7 +122,7 @@ block:
 	| print_block		{ $$ = $1; }
 	| return_block		{ $$ = $1; }
 	| statement 		{ $$ = (Token *)createStatementToken($1); check($$); }
-	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
+//	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
 	;
 
 braces:

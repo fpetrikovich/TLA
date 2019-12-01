@@ -63,7 +63,7 @@ new_line 	\n
 {coordinates} 			{ strcpy(yylval.string, yytext); return COORDINATES; }
 {variable} 				{ strcpy(yylval.string, yytext); return VAR;    }
 {string_reg}			{ strcpy(yylval.string, yytext); return STRING_LITERAL; }
-{new_line} 				{ yylineno++; return NEW_LINE; }		//Do we even use new line? should we just ignore it?
+{new_line} 				{ yylineno++; }		//Do we even use new line? should we just ignore it?
 .						;
 	
 %%
