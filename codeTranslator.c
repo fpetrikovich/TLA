@@ -8,7 +8,8 @@
 
 VariableToken *
 createOrFindVariable(const char *name) {
-	for (int i = 0; variable[i] != NULL && i < MAX_VARIABLES; i++) {
+  int i;
+	for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
 		if (strcmp(variables[i]->name, name)) {
 			return variables[i];
 		} 
@@ -46,7 +47,7 @@ stringTranslator(Token *token) {
 /* Tramslator for constant */
 char *
 constantTranslator(Token *token) {
-  char *value = ((ConstantToken *)token)->value;
+  char *value = ((ConstantToken *)token)->constant;
   char *buffer = malloc(strlen(value) + 1);
   if(buffer == NULL) {
   	return NULL;
@@ -207,10 +208,10 @@ operationTranslator(Token *token) {
 
   if (castedToken->first->type == VARIABLE_TOKEN && strcmp(castedToken->op, "=") == 0 || strcmp(castedToken->op, "+=") == 0 || strcmp(castedToken->op, "-=") == 0 || strcmp(castedToken->op, "/=") == 0 || strcmp(castedToken->op, "*=") == 0) {
     //We find the variable its refering to, if it doesn't exist we just create it
-    variableInfo *variable = findVariable(((VariableToken *)castedToken->first)->name);
+    VariableToken *variable = createOrFindVariable(((VariableToken *)castedToken->first)->name);
 
-    VariableToken *castedFirstToken 	= (VariableToken *)castedToken->first;
-    VariableToken *castedSecondToken 	= (VariableToken *)castedToken->second;
+    VariableToken *castedFirstToken  = castedToken->first;
+    VariableToken *castedSecondToken = castedToken->second;
 
     if ((castedToken->second->type == STRING_TOKEN || (castedToken->second->type == VARIABLE_TOKEN && castedSecondToken->stored != NULL && castedSecondToken->stored->type == STRING_TOKEN))) {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("char* ") + 4;
@@ -222,11 +223,11 @@ operationTranslator(Token *token) {
       	return NULL;
       }
       
-      if (variable->definida == 0) {
+      if (variable->declared == 0) {
         snprintf(buffer, bufferLenght, "char* ");
+        variable->declared = 1;
       }
 
-      variable->type = STRING_TOKEN;
     } else {
       const size_t bufferLenght = strlen(first) + strlen(op) + strlen(second) + strlen("int ") + 4;
       
