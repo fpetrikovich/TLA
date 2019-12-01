@@ -8,7 +8,8 @@
 
 VariableToken *
 createOrFindVariable(const char *name) {
-	for (int i = 0; variable[i] != NULL && i < MAX_VARIABLES; i++) {
+  int i;
+	for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
 		if (strcmp(variables[i]->name, name)) {
 			return variables[i];
 		} 
