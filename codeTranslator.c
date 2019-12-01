@@ -52,7 +52,7 @@ variableTranslator(Token *token) {
   }
   length += strlen(name) + strlen("_") + 1;
 
-  char *newVariable = calloc(length, sizeof(char));
+  char *newVariable = malloc(length);
   if(newVariable == NULL) {
     return NULL;
   }
@@ -412,7 +412,6 @@ statementTranslator(Token *token) {
   //We create an initial buffer to save our translated code to
   char *buffer 							= malloc(bufferLength);
   if(buffer == NULL) {
-  	//TODO: See how to best manage this errors
   	return NULL;
   }
   //We copy to buffer
@@ -433,7 +432,6 @@ statementListTranslator(Token *token) {
   //We create an initial buffer to save our translated code to
   char *buffer = malloc(1);
   if(buffer == NULL) {
-  	//TODO: See how to best manage this errors
   	return NULL;
   }
   buffer[0] = '\0';
@@ -477,6 +475,26 @@ statementListTranslator(Token *token) {
   return buffer;
 }
 
+char *
+singleOperationTranslator(Token *token) {
+  SingleOperationToken *soToken = (SingleOperationToken *)token;
+
+  char *variable = process(soToken->operand);
+  if (variable == NULL) return NULL;
+
+  const ssize_t bufferLength = strlen(variable) + 2 + 1; //+2 for ++ or --
+
+  char *buffer = malloc(bufferLength);
+  if(buffer == NULL) {
+    return NULL;
+  }
+  //We copy to buffer
+  snprintf(buffer, bufferLength, "%s%s", variable, soToken->op);
+  free(variable);
+  return buffer;
+}
+
+
 /* Token processing function
 		its return value should be free'd by whoever requested it once they are done with it */
 static char *
@@ -496,7 +514,7 @@ process(Token *token) {
   		returnValue = operationTranslator(token);
   		break;
   	case SINGLE_OPERATION_TOKEN:
-  		//TODO
+  		returnValue = singleOperationTranslator(token);
   		break;
   	case IF_TOKEN:
   		returnValue = ifTranslator(token);

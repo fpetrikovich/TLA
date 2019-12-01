@@ -336,7 +336,6 @@ void
 freeSingleOperationToken(Token *token) {
   if(token != NULL) {
     SingleOperationToken *castedToken = (SingleOperationToken *)token;
-    freeToken(castedToken->operand);
     free(castedToken->op);
     free(token);
   }

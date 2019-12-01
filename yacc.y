@@ -300,12 +300,16 @@ main(void) {
 	
 	yyparse(&code);
 
-	printf("#include <stdio.h>\n");
-	printf("#include <stdlib.h>\n\n");
-	printf("int main(int argc, char const *argv[]) {\n");
 	char * translation = translateToC((Token *)code);
-	printf("%s\n", translation);
-	printf("\nreturn 0;\n}");
+
+	if (translation == NULL) printf("Error allocating memory for generated C code.\n");
+	else {
+		printf("#include <stdio.h>\n");
+		printf("#include <stdlib.h>\n\n");
+		printf("int main(int argc, char const *argv[]) {\n");
+		printf("%s\n", translation);
+		printf("\nreturn 0;\n}");
+	}
 
 	free(translation);
 	freeToken((Token *) code);
