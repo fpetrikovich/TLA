@@ -429,7 +429,7 @@ statementTranslator(Token *token) {
   }
 
   //Aside from the lenght of the statement we need space for the new line and the NULL
-  const size_t bufferLenght = strlen(statement) + strlen("\n") + 1;
+  const size_t bufferLenght = strlen(statement) + strlen(";\n") + 1;
   //We create an initial buffer to save our translated code to
   char *buffer 							= malloc(bufferLenght);
   if(buffer == NULL) {
@@ -437,7 +437,7 @@ statementTranslator(Token *token) {
   	return NULL;
   }
   //We copy to buffer
-  snprintf(buffer, bufferLenght, "%s\n", statement);
+  snprintf(buffer, bufferLenght, "%s;\n", statement);
 
   //We no longer need the statement string so we free it
   free(statement);

@@ -79,10 +79,10 @@ func_type:
 	;
 
 statement:
-	  declaration SEMI_COLON
-	| assign_operation SEMI_COLON
-	| one_operation SEMI_COLON
-	| expression SEMI_COLON
+	  declaration SEMI_COLON		{ $$ = $1; }
+	| assign_operation SEMI_COLON   { $$ = $1; }
+	| one_operation SEMI_COLON      { $$ = $1; }
+	| expression SEMI_COLON         { $$ = $1; }
 	;
 
  declaration:
