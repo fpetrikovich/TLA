@@ -294,7 +294,7 @@ createSingleOperationToken(const Token *operand, const char *oper) {
 
     token->type     = SINGLE_OPERATION_TOKEN;
     if(operand->dataType != DATA_NUMBER) {
-      token->dataType = DATA_NULL
+      token->dataType = DATA_NULL;
     } else {
       token->dataType = operand->dataType;
     }
