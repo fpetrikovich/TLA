@@ -60,7 +60,7 @@ new_line 	\n
 {coordinates} 			{ strcpy(yylval.string, yytext); return STRING; }
 {variable} 				{ strcpy(yylval.string, yytext); return VAR;    }
 {new_line} 				{ yylineno++; return NEW_LINE; }
-.
+.						;
 	
 %%
 int yywrap(void) {
