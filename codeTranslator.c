@@ -555,15 +555,17 @@ sigmaPiTranslator(Token *token) {
   char *endAssignment   = process((Token *)finalNum);
   char *expression      = process((Token *)condToken->expression);
   char mathSymbol;
+  int neutralNum;
 
   mathSymbol = (castedToken->mathType == SUMMATION_TYPE ? '+' : '*');
+  neutralNum = (castedToken->mathType == SUMMATION_TYPE ? 0 : 1);
 
   endAssignment = changeAssignmentToLessThanOrEqualTo(endAssignment);
 
   ssize_t bufferLength = (strlen(iterateVariable) + 2) + strlen(startAssignment) + strlen(endAssignment) + strlen(expression) + strlen(acumUndeclared) + strlen(acumVariable) + strlen(" = 0;\nfor(;;) {\n+=;\n}\n");
   char *buffer = malloc(bufferLength);
 
-  snprintf(buffer, bufferLength, "%s = 0;\nfor(%s;%s;%s++){\n%s%c=%s;\n}\n", acumVariable, startAssignment, endAssignment, iterateVariable, acumUndeclared, mathSymbol, expression);
+  snprintf(buffer, bufferLength, "%s = %d;\nfor(%s;%s;%s++){\n%s%c=%s;\n}\n", acumVariable, neutralNum, startAssignment, endAssignment, iterateVariable, acumUndeclared, mathSymbol, expression);
 
   if (strcmp(acumVariable, acumUndeclared) != 0) free(acumUndeclared);
   free(acumVariable);

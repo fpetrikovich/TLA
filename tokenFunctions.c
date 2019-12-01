@@ -152,6 +152,11 @@ SigmaPiToken *
 createSigmaPiToken(MathType type, Token *acumVariable, Token *condition) {
   SigmaPiToken *token = malloc(sizeof *token);
   if (!isValid(token)) return NULL;
+
+  if (acumVariable->basicInfo.dataType == DATA_STRING) {
+    token->basicInfo.dataType = DATA_NULL;
+    return token;
+  }
   
   token->basicInfo.type     = SIGMA_PI_TOKEN;
   token->basicInfo.dataType = condition->basicInfo.dataType;
@@ -173,6 +178,11 @@ freeSigmaPiToken(Token * token){
 SigmaPiConditionToken *
 createSigmaPiCondtionToken (const Token *initNum, const Token *expr, const Token *finalNum) {
   SigmaPiConditionToken *token = malloc(sizeof *token);
+
+  if (initNum->basicInfo.dataType != DATA_NUMBER || finalNum->basicInfo.dataType != DATA_NUMBER) {
+    token->basicInfo.dataType = DATA_NULL;
+    return token;
+  }
 
   token->basicInfo.type     = SIGMA_PI_COND_TOKEN;
   token->basicInfo.dataType = DATA_NUMBER;

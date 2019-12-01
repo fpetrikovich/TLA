@@ -154,7 +154,9 @@ if_block:
 	;
 
 loop_block:
-	DO braces WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES SEMI_COLON 
+	  DO braces WHILE OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES SEMI_COLON 
+		{ $$ = (Token *)createCalculateWhileToken($5, $2); check($$); }
+	| DO braces WHILE OPEN_PARENTHESES logic_operation CLOSE_PARENTHESES SEMI_COLON 
 		{ $$ = (Token *)createCalculateWhileToken($5, $2); check($$); }
 	;
 
