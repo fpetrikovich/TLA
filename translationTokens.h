@@ -77,7 +77,7 @@ typedef struct ReturnToken {
 typedef struct ConstantToken {
   TokenType type;     //CONSTANT_TOKEN
   DataType  dataType;
-  char      *value;   //Constant value
+  char      *constant;   //Constant value
 } ConstantToken;
 
 /* Token for handling variables */

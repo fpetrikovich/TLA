@@ -66,8 +66,6 @@ TokenList *code;
 %type <string> FUNCTION COORDINATES NUMBER STRING VAR
 %type <string> count_op assign_op relational_op logic_op one_op
 
-
-
 %%
 
 type:
