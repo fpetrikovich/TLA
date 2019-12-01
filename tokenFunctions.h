@@ -75,4 +75,8 @@ createNegationToken 		(Token *expression);
 PrintToken *
 createPrintToken 			(Token *expression);
 
+/* Free's a token */
+void
+freeToken					(Token *token);
+
 #endif
