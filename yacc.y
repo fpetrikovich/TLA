@@ -295,9 +295,7 @@ check(Token * token) {
         	break;
        	default:
        	    if (token->basicInfo.dataType == DATA_NULL) {
-       	    	printf("%s\n", "INVALIDDDDD");
-       	    	exit(EXIT_FAILURE);
-       	    	//yyerror(&code, "Incorrect type in assignment or operation");
+       	    	yyerror(&code, "Incorrect type in assignment or operation");
        	    }
        	    break;
     }
