@@ -85,6 +85,16 @@ createNegationToken 		(Token *expression);
 PrintToken *
 createPrintToken 			(Token *expression);
 
+SigmaPiToken *
+createSigmaPiToken		    (MathType type, 
+							 Token *acumVariable,
+							 Token *condtion);
+
+SigmaPiConditionToken *
+createSigmaPiConditionToken (const Token *initNum,
+							 const Token *expression,
+							 const Token *finalNum);
+
 SlopeToken *
 createSlopeToken			(Token *coord1, Token* coord2);
 
@@ -111,10 +121,7 @@ void
 freeBlockToken(Token *token);
 
 void
-freeSummationToken(Token * token);
-
-void
-freeProductionToken(Token * token);
+freeSigmaPiToken(Token * token);
 
 void
 freeIfToken(Token *token);

@@ -1,24 +1,11 @@
 # TLA
 Creating our own programming language
 
-# How to compile LEX and YACC
-## YACC
-Run:
+# How to compile the project
+## Compile yacc, lex and project
+Compile everything:
 ```
-yacc -d file.y
-```
-The -d generates the y.tab.h header file
-The rest generates the y.tab.c (actual generated parser)
-
-## LEX
-Run:
-```
-lex file.l
-gcc -lfl lex.yy.c
+chmod +x compile.sh
+./compile.sh
 ```
 
-## Compile together
-```
-gcc lex.yy.c y.tab.c -o executable
-./executable
-```
