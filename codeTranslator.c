@@ -279,7 +279,8 @@ operationTranslator(Token *token) {
 /* Translator for block token */
 char *
 blockTranslator(Token *token) {
-  return process(token->statements);
+  BlockToken *castedToken = (BlockToken *)token;
+  return process((Token *) castedToken->statements);
 }
 
 /* Translator for empty token */
