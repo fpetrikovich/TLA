@@ -131,13 +131,21 @@ braces:
 	;
 
 if_block:
-	  IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
+	  IF OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES braces
 	  	{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, NULL); check($$); }
-	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
+	| IF OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
 	  	{ $$ = (Token *)createIfToken($3, $5, $8, $10, NULL); check($$); }
-	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
+	| IF OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
 	 	{ $$ = (Token *)createIfToken($3, $5, $8, $10, $12); check($$); }
-	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
+	| IF OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES braces ELSE braces
+		{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, $7); check($$); }
+	|  IF OPEN_PARENTHESES logic_operation CLOSE_PARENTHESES braces
+	  	{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, NULL); check($$); }
+	| IF OPEN_PARENTHESES logic_operation CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces
+	  	{ $$ = (Token *)createIfToken($3, $5, $8, $10, NULL); check($$); }
+	| IF OPEN_PARENTHESES logic_operation CLOSE_PARENTHESES braces ELIF OPEN_PARENTHESES expression CLOSE_PARENTHESES braces ELSE braces
+	 	{ $$ = (Token *)createIfToken($3, $5, $8, $10, $12); check($$); }
+	| IF OPEN_PARENTHESES logic_operation CLOSE_PARENTHESES braces ELSE braces
 		{ $$ = (Token *)createIfToken($3, $5, NULL, NULL, $7); check($$); }
 	;
 
