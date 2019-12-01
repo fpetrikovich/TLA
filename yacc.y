@@ -119,7 +119,7 @@ instructions:
 	;
 
 block:
-	  braces 			{ $$ = (Token *)createBlockToken($1); check($$); }
+	  braces 			{ $$ = (Token *)createBlockToken((TokenList *) $1); check($$); }
 	| if_block 			{ $$ = $1; }
 	| loop_block		{ $$ = $1; }
 	| print_block		{ $$ = $1; }
