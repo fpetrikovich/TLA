@@ -176,7 +176,7 @@ freeSummationToken(Token * token){
 }
 
 SlopeToken *
-createSlopeToken(const Token * coord1, const Token * coord2){
+createSlopeToken(Token * coord1, Token * coord2){
   SlopeToken *token = malloc(sizeof * token);
   if(!isValid(token)) return NULL;
   if(coord1->basicInfo.type != COORDINATES_TOKEN || coord2->basicInfo.type != COORDINATES_TOKEN){
