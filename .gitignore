@@ -32,3 +32,7 @@
 y.tab.c
 y.tab.h
 lex.yy.c
+out
+input
+test
+output.c
