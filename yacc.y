@@ -27,7 +27,7 @@ TokenList *code;
 /* Specify the different types 
  * my lexical analyzer can return */
 %union {
-	char 	  string[500];
+	char 	  		  string[500];
 	struct Token     *token;
 	struct TokenList *list;
 }
@@ -49,7 +49,7 @@ TokenList *code;
 %token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
-%token NUMBER NUMBER_VAL FUNCTION COORDINATES VARIABLE STRING STRING_VAL
+%token NUMBER NUMBER_VAL FUNCTION COORDINATES VAR STRING STRING_VAL
 %token NEW_LINE 
 %token START END
 
@@ -59,11 +59,11 @@ TokenList *code;
  * in the union */
 %type <list> braces instructions main
 %type <token> type func_type block if_block loop_block /*math_block slope_block */declaration
-%type <token> print_block return_block statement
+%type <token> print_block return_block statement variable
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
 %type <token> simple_expression base_expression expression
 
-%type <string> VARIABLE STRING_VAL NUMBER_VAL variable
+%type <string> VAR 
 %type <string> FUNCTION COORDINATES NUMBER STRING
 %type <string> count_op assign_op relational_op logic_op one_op
 
@@ -89,7 +89,7 @@ statement:
 	;
 
  declaration:
- 	  type VARIABLE  				 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = (Token *)castVariable($$, $1); check($$);} 	
+ 	  type VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = (Token *)castVariable($$, $1); check($$);} 	
  	| declaration ASSIGN expression  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
@@ -158,7 +158,7 @@ return_block:
 	;
 
 variable:
-	VARIABLE  { $$ = (Token *)createOrFindVariable($1); check($$); }
+	VAR  { $$ = (Token *)createOrFindVariable($1); check($$); }
 	;
 
 base_expression:

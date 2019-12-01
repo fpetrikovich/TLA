@@ -39,8 +39,8 @@ createCalculateWhileToken	(const Token *condition,
 /* Creation function for an operation token */
 OperationToken *
 createOperationToken		(const Token *first,
-							 const Token *second,
-							 const char *oper);
+							 const char *oper,
+							 const Token *second);
 
 /* Creation function for a single operation token */
 SingleOperationToken *

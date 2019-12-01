@@ -58,7 +58,7 @@ new_line 	\n
 
 {decimal} 				{ strcpy(yylval.string, yytext); return NUMBER; }
 {coordinates} 			{ strcpy(yylval.string, yytext); return STRING; }
-{variable} 				{ strcpy(yylval.string, yytext); return VARIABLE; }
+{variable} 				{ strcpy(yylval.string, yytext); return VAR;    }
 {new_line} 				{ yylineno++; return NEW_LINE; }
 .
 	
