@@ -46,9 +46,5 @@ test2
 test3 
 test4 
 test5
-outputTest1.c
-outputTest2.c
-outputTest3.c
-outputTest4.c
-outputTest5.c
-
+test6
+outputTest*

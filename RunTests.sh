@@ -1,8 +1,9 @@
 #!/bin/bash
 
-./generator < tests/test1.m > outputTest1.c && gcc -o test1 outputTest1.c && ./test1
-./generator < tests/test2.m > outputTest2.c && gcc -o test2 outputTest2.c && ./test2
-./generator < tests/test3.m > outputTest3.c && gcc -o test3 outputTest3.c && ./test3
-./generator < tests/test4.m > outputTest4.c && gcc -o test4 outputTest4.c && ./test4
-./generator < tests/test5.m > outputTest5.c && gcc -o test5 outputTest5.c && ./test5
+./generator < tests/test1.m > generatedCode/outputTest1.c && gcc -o executableTests/test1 generatedCode/outputTest1.c && ./executableTests/test1
+./generator < tests/test2.m > generatedCode/outputTest2.c && gcc -o executableTests/test2 generatedCode/outputTest2.c && ./executableTests/test2
+./generator < tests/test3.m > generatedCode/outputTest3.c && gcc -o executableTests/test3 generatedCode/outputTest3.c && ./executableTests/test3
+./generator < tests/test4.m > generatedCode/outputTest4.c && gcc -o executableTests/test4 generatedCode/outputTest4.c && ./executableTests/test4
+./generator < tests/test5.m > generatedCode/outputTest5.c && gcc -o executableTests/test5 generatedCode/outputTest5.c && ./executableTests/test5
+./generator < tests/test6.m > generatedCode/outputTest6.c && gcc -o executableTests/test6 generatedCode/outputTest6.c && ./executableTests/test6
 

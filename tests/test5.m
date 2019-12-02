@@ -5,7 +5,7 @@ number val1=1;
 number val2=0;
 if (val1==1 && val2==1){
 	print(b);
-}
+} 
 else{
 	print(a);
 }
@@ -21,4 +21,5 @@ if (val1==1 || val2==1){
 else{
 	print(b);
 }
+
 end 
