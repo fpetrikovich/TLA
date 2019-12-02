@@ -117,7 +117,8 @@ function_block:
 	 	Token *function_name = (Token *)createOrFindVariable($2); 
 	 	check(function_name); 
 	 	function_name = castVariable(function_name, DATA_FUNCTION); 
-	 	check(function_name); 
+	 	check(function_name);
+	 	((VariableToken *)$4)->declared = 1; 
 	 	$$ = (Token *)createFunctionDefToken(function_name, $6, $4); check($$); 
 	 }
 

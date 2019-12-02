@@ -178,7 +178,7 @@ functionDefTranslator(Token *token) {
     return NULL;
   }
 
-  size_t bufferLength = strlen(name) + strlen(param) + strlen(body) + strlen("%s (%s) {%s}\n"); + 1;
+  size_t bufferLength = strlen(name) + strlen(param) + strlen(body) + strlen("%s (int %s) {%s}\n"); + 1;
   char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
     free(name);
@@ -196,7 +196,7 @@ functionDefTranslator(Token *token) {
     return NULL;
   }
 
-  snprintf(buffer, bufferLength, "%s(%s){%s}\n", name, param, body);
+  snprintf(buffer, bufferLength, "%s(int %s){%s}\n", name, param, body);
 
   //Now instead of returning it we add it to our external array and we return a dummy
   if(addFunctionToArray(buffer) == -1) {
