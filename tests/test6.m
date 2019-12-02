@@ -1,14 +1,27 @@
 start
-string a = "Function defined and called succesfully!\n";
-string b = "Error in function calling\n";
+string ifString = "In if block\n";
+string elifString = "In elif block\n";
+string elseString = "In else block\n";
 
-function func1(number n) {
-	return n * n;	
-};
+number n = 1;
+number l = 2;
 
-if (func1(10) == 100) {
-	print(a);
-} else {
-	print(b);
+if (n == 1) {
+	print(ifString);
 }
+
+if (l == 0) {
+	print(ifString);
+} 
+elif (l > n) {
+	print(elifString);
+}
+
+if ( l <= n) {
+	print(ifString);
+}
+else {
+	print(elseString);
+}
+
 end

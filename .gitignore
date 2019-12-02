@@ -48,11 +48,5 @@ test4
 test5
 test6
 test7
-outputTest1.c
-outputTest2.c
-outputTest3.c
-outputTest4.c
-outputTest5.c
-outputTest6.c
-outputTest7.c
-
+test8
+outputTest*

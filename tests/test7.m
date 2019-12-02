@@ -1,19 +1,12 @@
 start
-string a = "Succesfully chained function calls!\n";
-string b = "Failed to chain function calls\n";
+string a = "Function defined and called succesfully!\n";
+string b = "Error in function calling\n";
 
 function func1(number n) {
-	return n + n;
+	return n * n;	
 };
 
-function func2(number m) {
-	return m * m;
-};
-
-number chain1 = func1(func2(10));
-number chain2 = func2(func1(10));
-
-if ( (chain1 == 200) && (chain2 == 400)) {
+if (func1(10) == 100) {
 	print(a);
 } else {
 	print(b);
