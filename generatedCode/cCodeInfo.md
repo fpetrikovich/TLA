@@ -1,0 +1,1 @@
+The generated C code files will be found here after executing the bash script.
