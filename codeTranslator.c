@@ -487,13 +487,13 @@ returnTranslator(Token *token) {
   	return NULL;
   }
 
-  const size_t bufferLength = strlen(expression) + strlen("return ;\n") + 1;
+  const size_t bufferLength = strlen(expression) + strlen("return ") + 1;
   char *buffer = malloc(bufferLength);
   if(buffer == NULL) {
   	free(expression);
   	return NULL;
   }
-  snprintf(buffer, bufferLength, "return %s;\n", expression);
+  snprintf(buffer, bufferLength, "return %s", expression);
 
   free(expression);
   return buffer;
@@ -831,6 +831,9 @@ process(Token *token) {
       returnValue = slopeTranslator(token);
   }
   //Return the translation of the token
+  if(returnValue == NULL) {
+    printf("Returning NULL for type: %d\n", token->basicInfo.type);
+  }
   return returnValue;
 }
 
