@@ -8,7 +8,7 @@ chmod +x compile.sh
 ./compile.sh
 chmod +x RunTests.sh
 ```
-##Run Tests
+## Run Tests
 ```
 ./RunTests.sh
 ```
