@@ -1,5 +1,4 @@
 start
-
 string ifString = "In if block\n";
 string elifString = "In elif block\n";
 string elseString = "In else block\n";
