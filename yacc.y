@@ -278,9 +278,6 @@ check(Token * token) {
 	if (token == NULL) {
 		yyerror(&code, "Error allocating memory");
 	}
-	//if (token->basicInfo.type == IF_TOKEN) printf("HI\n");
-	//if (token->basicInfo.type == FUNCTION_DEF_TOKEN) printf("HI\n");
-	if (token->basicInfo.type == VARIABLE_TOKEN) printf("HI\n");
 
 	/* Must check that the type is correct (NULL = error):
 	 * Operation and assignment must have matching types */

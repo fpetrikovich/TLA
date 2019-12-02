@@ -18,7 +18,6 @@ isValid(void *ptr) {
 
 VariableToken *
 createOrFindVariable(const char *name) {
-  printf("IN createOrFindVariable with NAME = %s\n", name);
   int i;
   for (i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {
     if (strcmp(variables[i]->name, name) == 0) {
@@ -26,8 +25,6 @@ createOrFindVariable(const char *name) {
     } 
   }
   variables[i] = createVariableToken(name);
-  if (variables[i]->basicInfo.dataType == DATA_NEW) printf("DATA_NEW\n");
-  if (variables[i]->basicInfo.dataType == DATA_NULL) printf("DATA_NULL\n");
   return variables[i];
 }
 
@@ -36,12 +33,10 @@ castVariable(Token *variable, DataType dataType) {
   VariableToken * var = (VariableToken *)variable;
   if(variable->basicInfo.dataType != DATA_NEW){
     /* Already casted before --> redeclaration = error */
-    printf("VARIABLEEEEEEE = %s\n", var->name);
 
     variable->basicInfo.dataType = DATA_NULL;
     return variable;
   }
-  printf("VARIABLEEEEEEE = %s\n", var->name);
 
   variable->basicInfo.dataType = dataType;
   return variable;
@@ -570,7 +565,6 @@ freeNegationToken(Token *token) {
 /* Creates a function definition token */
 FunctionDefinitionToken *
 createFunctionDefToken(Token *name, Token *body, Token *param) {
-  printf("INSIDE = createFunctionDefToken\n");
   FunctionDefinitionToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
 
@@ -603,7 +597,6 @@ createFunctionDefToken(Token *name, Token *body, Token *param) {
 /* Frees a function definition token */
 void
 freeFunctionDefToken(Token *token) {
-    printf("INSIDE = freeFunctionDefToken\n");
   if(token != NULL) {
     FunctionDefinitionToken *castedToken = (FunctionDefinitionToken *)token;
     //Variable is freed later
@@ -615,8 +608,6 @@ freeFunctionDefToken(Token *token) {
 /* Creates a function call token */
 FunctionCallToken *
 createFunctionCallToken(Token *name, Token *expression) {
-    printf("INSIDE = createFunctionCallToken\n");
-  printf("Calling function %s\n", ((VariableToken *)name)->name);
   FunctionCallToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
 
@@ -648,7 +639,6 @@ freeFunctionCallToken(Token *token) {
 /* Creates a print token */
 PrintToken *
 createPrintToken(Token *expression) {
-  printf("Print token\n");
   PrintToken *token = malloc(sizeof *token);
   if(!isValid(token)) return NULL;
   
@@ -676,7 +666,6 @@ freePrintToken(Token *token) {
 void
 freeToken(Token *token) {
   if(token != NULL) {
-    printf("TOKEN = %d\n", token->basicInfo.type);
     switch(token->basicInfo.type) {
       case NULL_TOKEN:
         freeEmptyToken(token);

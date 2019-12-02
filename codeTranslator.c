@@ -831,9 +831,6 @@ process(Token *token) {
       returnValue = slopeTranslator(token);
   }
   //Return the translation of the token
-  if(returnValue == NULL) {
-    printf("Returning NULL for type: %d\n", token->basicInfo.type);
-  }
   return returnValue;
 }
 
