@@ -317,7 +317,9 @@ main(void) {
 	else {
 		printf("#include <stdio.h>\n");
 		printf("#include <stdlib.h>\n\n");
-		printf("%s\n", functionsTranslation);
+		if(functionsTranslation != NULL) {
+			printf("%s\n", functionsTranslation);
+		}
 		printf("int main(int argc, char const *argv[]) {\n");
 		printf("%s\n", translation);
 		printf("\nreturn 0;\n}");
