@@ -39,3 +39,11 @@ output.c
 exampleCode
 a.out
 vgcore*
+.vscode/
+generator
+test1 
+test2 
+test3 
+test4 
+test5
+
