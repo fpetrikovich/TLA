@@ -371,7 +371,6 @@ ifTranslator(Token *token) {
   return buffer;
 }
 
-//TODO: Revise this whole variable thing, is it needed
 /* Translator for operation token */
 char *
 operationTranslator(Token *token) {
@@ -615,7 +614,6 @@ statementListTranslator(Token *token) {
   }
   buffer[0] = '\0';
 
-  //TODO: This should never happen but we check just in case
   if (list == NULL)
     return buffer;
 
@@ -628,14 +626,12 @@ statementListTranslator(Token *token) {
     //We translate this current Token to C code
     char *newCode = process(currentToken);
     if(newCode == NULL) {
-    	//TODO: See how to best manange this errors
     	free(buffer);
     	return NULL;
     }
     //We allocate the extra memory for this new code
     char *newBuffer = realloc(buffer, strlen(newCode) + strlen(buffer) + 1);
     if (newBuffer == NULL) {
-    	//TODO: See how to best manange this errors
       free(newCode);
     	free(buffer);
     	return NULL;
@@ -816,7 +812,7 @@ process(Token *token) {
       returnValue = functionCallTranslator(token);
       break;
   	case COORDINATES_TOKEN:
-  		//TODO
+  		//TODO IN FUTURE IMPLEMENTATIONS
   		break;
   	case VARIABLE_TOKEN:
   		returnValue = variableTranslator(token);

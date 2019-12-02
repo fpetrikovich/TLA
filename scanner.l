@@ -19,9 +19,8 @@ new_line 	\n
 "while"					return WHILE;
 "print"					return PRINT;
 "number"				return NUMBER_TYPE;
-"coordinates"			return COORDINATES;
 "string"				return STRING_TYPE;	
-"function"				return FUNCTION_TYPE; //NO SE SI VA ESTA?
+"function"				return FUNCTION_TYPE; 
 "return"				return RETURN;
 "+="					return ASSIGN_SUM;
 "*="					return ASSIGN_MULTI;
@@ -61,7 +60,6 @@ new_line 	\n
 
 
 {number} 				{ strcpy(yylval.string, yytext); return NUMBER_LITERAL; }
-{coordinates} 			{ strcpy(yylval.string, yytext); return COORDINATES; }
 {variable} 				{ strcpy(yylval.string, yytext); return VAR;    }
 {string_reg}			{ strcpy(yylval.string, yytext); return STRING_LITERAL; }
 {new_line} 				{ yylineno++; }		//Do we even use new line? should we just ignore it?

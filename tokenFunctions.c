@@ -95,7 +95,6 @@ addStatement(const TokenList *list, const Token *statement) {
   //Once we find the current token who's next is null, we add our new statement to that next
   currentToken->next = createStatementList(statement);
   if(!isValid(currentToken->next)) {
-    //TODO: Free the previous elements of the list
     freeToken((Token *)list);
     return NULL;
   }
@@ -493,7 +492,6 @@ createVariableToken(const char *var) {
 void
 freeVariableToken(VariableToken *token) {
   if(token != NULL) {
-    //TODO: Fix this!!!!
     free(token->name);
     free(token);
   }
@@ -578,7 +576,6 @@ createFunctionDefToken(Token *name, Token *body, Token *param) {
 
   //Blocks can be null but we wont let a function be null, we check
   if(body == NULL || body->basicInfo.type != BLOCK_TOKEN) {
-    //TODO: free tokens? analyze the idea
     free(token);
     return NULL;
   }
@@ -710,7 +707,7 @@ freeToken(Token *token) {
         freeFunctionCallToken(token);
         break;
       case COORDINATES_TOKEN:
-        //TODO
+        //TODO IN FUTURE IMPLEMENTATIONS
         break;
       case VARIABLE_TOKEN:
         //Will be done in the main;
@@ -733,7 +730,6 @@ freeToken(Token *token) {
   }
 }
 
-// VARIABLES FREE
 void
 freeVariables(void) {
   for (int i = 0; variables[i] != NULL && i < MAX_VARIABLES; i++) {

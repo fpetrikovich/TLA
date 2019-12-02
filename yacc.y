@@ -50,7 +50,6 @@ TokenList *code;
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
 %token NUMBER_LITERAL NUMBER_TYPE FUNCTION_TYPE COORDINATES VAR STRING_LITERAL STRING_TYPE
-//%token NEW_LINE 
 %token START END
 
 /* ---------------------------------------------
@@ -82,8 +81,7 @@ declaration:
  	  NUMBER_TYPE VAR  				     { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_NUMBER); check($$);}
  	| STRING_TYPE VAR 					 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_STRING); check($$);} 	
  	| declaration ASSIGN expression  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
- 	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
-
+ 	;
 
 main:
 	  START instructions END 	{ *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
@@ -238,7 +236,6 @@ assign_op:
 
 assign_operation:
 	variable assign_op expression  { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
-	// | variable assign_op slope_block { $$ = (Token *)createOperationToken($1, $2, $3); check($$); }
 
 
  math_block:
@@ -257,9 +254,11 @@ math_condition:
 		{ $$ = (Token *)createSigmaPiConditionToken($1, $3, $5); check($$); }
 	;
 
-// slope_block:
-// 	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
-// 	;
+/* FUTURE IMPLEMENTATION
+ * slope_block:
+ *  	SLOPE OPEN_PARENTHESES COORDINATES COMA COORDINATES CLOSE_PARENTHESES SEMI_COLON
+ *  	;
+ */
 
 %%
 
@@ -280,19 +279,10 @@ check(Token * token) {
 		yyerror(&code, "Error allocating memory");
 	}
 
-	/* Must check that the type is correct (NULL = error):
+	/* Must check that the type is correct 
 	 * Operation and assignment must have matching types */
-	switch(token->basicInfo.type) {
-        case IF_TOKEN:
-        case WHILE_TOKEN:
-        case NULL_TOKEN:
-        	// Has no dataType field
-        	break;
-       	default:
-       	    if (token->basicInfo.dataType == DATA_NULL) {
-       	    	yyerror(&code, "Incorrect type in assignment or operation");
-       	    }
-       	    break;
+	if (token->basicInfo.dataType == DATA_NULL) {
+     	yyerror(&code, "Incorrect type in assignment or operation");
     }
 }
 
