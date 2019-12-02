@@ -49,7 +49,7 @@ TokenList *code;
 %token PRODUCT_OF SUM_OF SUMMATION PRODUCT FACTORIAL SLOPE
 %token EQUAL_OP NOT_EQUAL_OP GT_OP GTE_OP LT_OP LTE_OP AND_OP OR_OP NOT_OP
 %token COMA SEMI_COLON OPEN_BRACES CLOSE_BRACES OPEN_PARENTHESES CLOSE_PARENTHESES
-%token NUMBER_LITERAL NUMBER_TYPE FUNCTION COORDINATES VAR STRING_LITERAL STRING_TYPE
+%token NUMBER_LITERAL NUMBER_TYPE FUNCTION_TYPE COORDINATES VAR STRING_LITERAL STRING_TYPE
 //%token NEW_LINE 
 %token START END
 
@@ -61,28 +61,19 @@ TokenList *code;
 %type <token> block if_block loop_block declaration math_block math_condition /*slope_block */
 %type <token> print_block return_block statement variable braces
 %type <token> count_operation assign_operation relational_operation logic_operation one_operation
-%type <token> simple_expression base_expression expression
+%type <token> simple_expression base_expression expression function_call function_block
 
-%type <string> FUNCTION COORDINATES NUMBER_LITERAL NUMBER_TYPE STRING_LITERAL VAR STRING_TYPE
+%type <string> FUNCTION_TYPE COORDINATES NUMBER_LITERAL NUMBER_TYPE STRING_LITERAL VAR STRING_TYPE
 %type <string> count_op assign_op relational_op logic_op one_op
 
 %%
 
-//type:
-	//  func_type   { $$ = $1; }
-	// | FUNCTION    { $$ = (Token *)createFunctionToken($1); check($$); } //TODO
-	// | COORDINATES { $$ = (Token *)createCoordinateToken($1); check($$); }
-/* types allowed in a function */
-//func_type:
-	//  NUMBER_TYPE  { $$ = (Token *)createConstantToken($1); check($$); }
-	//| STRING_TYPE  { $$ = (Token *)createStringToken($1); check($$); }
-
 statement:
 	  declaration SEMI_COLON		{ $$ = (Token *)createStatementToken($1); check($$); }
+	| print_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
 	| assign_operation SEMI_COLON   { $$ = (Token *)createStatementToken($1); check($$); }
 	| one_operation SEMI_COLON      { $$ = (Token *)createStatementToken($1); check($$); }
 	| expression SEMI_COLON         { $$ = (Token *)createStatementToken($1); check($$); }
-	| print_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
 	| return_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
 	| math_block SEMI_COLON 		{ $$ = (Token *)createStatementToken($1); check($$); }
 	;
@@ -92,21 +83,7 @@ declaration:
  	| STRING_TYPE VAR 					 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_STRING); check($$);} 	
  	| declaration ASSIGN expression  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
- 	// | function_declaration
 
-// function_declaration:
-// 	FUNCTION STRING OPEN_PARENTHESES func_type variable CLOSE_PARENTHESES function_definition
-// 	;
-
-// function_definition:
-// 	OPEN_BRACES function_value CLOSE_BRACES SEMI_COLON
-// 	;
-
-// function_value:
-// 	  function_value NEW_LINE
-// 	| function_value function_value
-// 	| STRING_VAL OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES ASSIGN_FUNC expression SEMI_COLON
-// 	;
 
 main:
 	  START instructions END 	{ *code = createStatementList((Token *)$2); $$ = *code; check((Token *)$$);}
@@ -118,21 +95,32 @@ instructions:
 	;
 
 block:
-	  braces 			{ $$ = $1; }		//Check this action
-	| if_block 			{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
-	| loop_block		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
-	| statement 		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }				//Check this action
-	| block braces 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
-	| block if_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
-	| block loop_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
-	| block statement 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
-//	| NEW_LINE 			{ $$ = createEmptyToken(); check($$); }
+	  braces 				{ $$ = $1; }		//Check this action
+	| if_block 				{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
+	| loop_block			{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
+	| statement 			{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }				//Check this action
+	| function_block 		{ TokenList *list = createStatementList($1); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$); }
+	| block braces 			{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block if_block 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block loop_block 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block statement 		{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
+	| block function_block 	{ if($1 == NULL) {TokenList *list = createStatementList($2); check((Token *)list); $$ = (Token *)createBlockToken(list); check($$);} else {TokenList *list = addStatement(((BlockToken *) $1)->statements, $2); check((Token *)list); $$ = $1; check($$);} }
 	;
 
 braces:
 	  OPEN_BRACES CLOSE_BRACES				{ $$ = NULL; }
 	| OPEN_BRACES block CLOSE_BRACES 		{ $$ = (Token *)$2; }
 	;
+
+function_block:
+	 FUNCTION_TYPE VAR OPEN_PARENTHESES declaration CLOSE_PARENTHESES block SEMI_COLON { 
+	 	Token *function_name = (Token *)createOrFindVariable($2); 
+	 	check(function_name); 
+	 	function_name = castVariable(function_name, DATA_FUNCTION); 
+	 	check(function_name);
+	 	((VariableToken *)$4)->declared = 1; 
+	 	$$ = (Token *)createFunctionDefToken(function_name, $6, $4); check($$); 
+	 }
 
 if_block:
 	  IF OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES braces
@@ -190,6 +178,11 @@ expression:
 	| count_operation		{ $$ = $1; }
 	| relational_operation	{ $$ = $1; }
 	| logic_operation		{ $$ = $1; }
+	| function_call			{ $$ = $1; }
+	;
+
+function_call:
+	VAR OPEN_PARENTHESES expression CLOSE_PARENTHESES { Token *function_name = (Token *)createOrFindVariable($1); check( function_name); $$ = (Token *)createFunctionCallToken(function_name, $3); check($$); }
 	;
 
 count_op:
@@ -317,17 +310,28 @@ main(void) {
 	yyparse(&code);
 
 	char * translation = translateToC((Token *)code);
+	//We should always call get functions after translateToC
+	char * functionsTranslation = getFunctions();
 
 	if (translation == NULL) printf("Error allocating memory for generated C code.\n");
 	else {
 		printf("#include <stdio.h>\n");
 		printf("#include <stdlib.h>\n\n");
+		if(functionsTranslation != NULL) {
+			printf("%s\n", functionsTranslation);
+		}
 		printf("int main(int argc, char const *argv[]) {\n");
 		printf("%s\n", translation);
 		printf("\nreturn 0;\n}");
 	}
 
-	free(translation);
+	if(translation != NULL) {
+		free(translation);
+	}
+	if(functionsTranslation != NULL) {
+		free(functionsTranslation);
+	}
+	freeFunctions();
 	freeToken((Token *) code);
 	freeVariables();
 	return 0;

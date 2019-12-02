@@ -98,6 +98,18 @@ createSigmaPiConditionToken (const Token *initNum,
 SlopeToken *
 createSlopeToken			(Token *coord1, Token* coord2);
 
+FunctionDefinitionToken *
+createFunctionDefToken(Token *name, Token *body, Token *param);
+
+FunctionCallToken *
+createFunctionCallToken(Token *name, Token *expression);
+
+void
+freeFunctionDefToken(Token *token);
+
+void
+freeFunctionCallToken(Token *token);
+
 /* Free's a token */
 void
 freeToken					(Token *token);

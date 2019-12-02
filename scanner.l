@@ -21,7 +21,7 @@ new_line 	\n
 "number"				return NUMBER_TYPE;
 "coordinates"			return COORDINATES;
 "string"				return STRING_TYPE;	
-"function"				return FUNCTION; //NO SE SI VA ESTA?
+"function"				return FUNCTION_TYPE; //NO SE SI VA ESTA?
 "return"				return RETURN;
 "+="					return ASSIGN_SUM;
 "*="					return ASSIGN_MULTI;

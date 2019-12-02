@@ -30,11 +30,14 @@ createOrFindVariable(const char *name) {
 
 Token *
 castVariable(Token *variable, DataType dataType) {
+  VariableToken * var = (VariableToken *)variable;
   if(variable->basicInfo.dataType != DATA_NEW){
     /* Already casted before --> redeclaration = error */
+
     variable->basicInfo.dataType = DATA_NULL;
     return variable;
   }
+
   variable->basicInfo.dataType = dataType;
   return variable;
 }
@@ -559,6 +562,80 @@ freeNegationToken(Token *token) {
   }
 }
 
+/* Creates a function definition token */
+FunctionDefinitionToken *
+createFunctionDefToken(Token *name, Token *body, Token *param) {
+  FunctionDefinitionToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+
+  token->basicInfo.type     = FUNCTION_DEF_TOKEN;
+  token->basicInfo.dataType = DATA_NODATA;      //A definition has no data type, a call has data type number
+  if(name->basicInfo.type != VARIABLE_TOKEN || name->basicInfo.dataType != DATA_FUNCTION) {
+    free(token);
+    return NULL;
+  }
+  token->name = (Token *)name;
+
+  //Blocks can be null but we wont let a function be null, we check
+  if(body == NULL || body->basicInfo.type != BLOCK_TOKEN) {
+    //TODO: free tokens? analyze the idea
+    free(token);
+    return NULL;
+  }
+
+  token->body = (Token *)body;
+
+  if(param->basicInfo.type != VARIABLE_TOKEN || param->basicInfo.dataType != DATA_NUMBER) {
+    free(token);
+    return NULL;
+  }
+
+  token->param = (Token *)param;
+  return token;
+}
+
+/* Frees a function definition token */
+void
+freeFunctionDefToken(Token *token) {
+  if(token != NULL) {
+    FunctionDefinitionToken *castedToken = (FunctionDefinitionToken *)token;
+    //Variable is freed later
+    freeToken(castedToken->body);
+    free(token);
+  }
+}
+
+/* Creates a function call token */
+FunctionCallToken *
+createFunctionCallToken(Token *name, Token *expression) {
+  FunctionCallToken *token = malloc(sizeof *token);
+  if(!isValid(token)) return NULL;
+
+  token->basicInfo.type = FUNCTION_CALL_TOKEN;
+  if(expression->basicInfo.dataType != DATA_NUMBER || name->basicInfo.dataType != DATA_FUNCTION) {
+    token->basicInfo.dataType = DATA_NULL;
+  } else {
+    token->basicInfo.dataType = DATA_NUMBER;
+  }
+
+  token->name       = (Token *)name;
+  token->expression = (Token *)expression;
+
+  return token;
+}
+
+/* Frees function call */
+void
+freeFunctionCallToken(Token *token) {
+  if(token != NULL) {
+    FunctionCallToken *castedToken = (FunctionCallToken *)token;
+    //Variable is freed later
+    freeToken(castedToken->expression);
+    free(token);
+  }
+}
+
+
 /* Creates a print token */
 PrintToken *
 createPrintToken(Token *expression) {
@@ -566,10 +643,10 @@ createPrintToken(Token *expression) {
   if(!isValid(token)) return NULL;
   
   token->basicInfo.type       = PRINT_TOKEN;
-  if(expression->basicInfo.dataType == DATA_STRING || expression->basicInfo.dataType == DATA_NUMBER) {
-    token->basicInfo.dataType = expression->basicInfo.dataType;
-  } else {
+  if(expression->basicInfo.dataType != DATA_STRING && expression->basicInfo.dataType != DATA_NUMBER) {
     token->basicInfo.dataType = DATA_NULL;
+  } else {
+    token->basicInfo.dataType = expression->basicInfo.dataType;
   }
   token->expression = expression;
   return token;
@@ -626,7 +703,12 @@ freeToken(Token *token) {
       case CONSTANT_TOKEN:
         freeConstantToken(token);
         break;
-      case FUNCTION_TOKEN:
+      case FUNCTION_DEF_TOKEN:
+        freeFunctionDefToken(token);
+        break;
+      case FUNCTION_CALL_TOKEN:
+        freeFunctionCallToken(token);
+        break;
       case COORDINATES_TOKEN:
         //TODO
         break;
