@@ -653,7 +653,7 @@ createPrintToken(Token *expression) {
   if(!isValid(token)) return NULL;
   
   token->basicInfo.type       = PRINT_TOKEN;
-  if(expression->basicInfo.dataType != DATA_STRING || expression->basicInfo.dataType != DATA_NUMBER) {
+  if(expression->basicInfo.dataType != DATA_STRING && expression->basicInfo.dataType != DATA_NUMBER) {
     token->basicInfo.dataType = DATA_NULL;
   } else {
     token->basicInfo.dataType = DATA_NODATA;
