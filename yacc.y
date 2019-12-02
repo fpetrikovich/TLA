@@ -113,7 +113,7 @@ braces:
 	;
 
 function_block:
-	 FUNCTION_TYPE VAR OPEN_PARENTHESES declaration CLOSE_PARENTHESES block { 
+	 FUNCTION_TYPE VAR OPEN_PARENTHESES declaration CLOSE_PARENTHESES block SEMI_COLON { 
 	 	Token *function_name = (Token *)createOrFindVariable($2); 
 	 	check(function_name); 
 	 	function_name = castVariable(function_name, DATA_FUNCTION); 
@@ -181,7 +181,7 @@ expression:
 	;
 
 function_call:
-	VAR OPEN_PARENTHESES base_expression CLOSE_PARENTHESES { Token *function_name = (Token *)createOrFindVariable($1); check( function_name); $$ = (Token *)createFunctionCallToken(function_name, $3); check($$); }
+	VAR OPEN_PARENTHESES expression CLOSE_PARENTHESES { Token *function_name = (Token *)createOrFindVariable($1); check( function_name); $$ = (Token *)createFunctionCallToken(function_name, $3); check($$); }
 	;
 
 count_op:
