@@ -83,8 +83,6 @@ declaration:
  	| STRING_TYPE VAR 					 { $$ = (Token *)createOrFindVariable($2); check($$); $$ = castVariable($$, DATA_STRING); check($$);} 	
  	| declaration ASSIGN expression  	 { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
  	// | declaration ASSIGN slope_block { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }
- 	// | declaration ASSIGN math_block  { $$ = (Token *)createOperationToken($1, "=", $3); check($$); }	
-
 
 
 main:
@@ -115,7 +113,13 @@ braces:
 	;
 
 function_block:
-	 FUNCTION_TYPE VAR OPEN_PARENTHESES NUMBER_TYPE VAR CLOSE_PARENTHESES block { Token *function_name = (Token *)createOrFindVariable($2); check(function_name); function_name = castVariable(function_name, DATA_FUNCTION); check(function_name); Token *param = (Token *)createOrFindVariable($5); check(param); param = castVariable(param, DATA_NUMBER); check(param); $$ = (Token *)createFunctionDefToken(function_name, $7,param); check($$); }
+	 FUNCTION_TYPE VAR OPEN_PARENTHESES declaration CLOSE_PARENTHESES block { 
+	 	Token *function_name = (Token *)createOrFindVariable($2); 
+	 	check(function_name); 
+	 	function_name = castVariable(function_name, DATA_FUNCTION); 
+	 	check(function_name); 
+	 	$$ = (Token *)createFunctionDefToken(function_name, $6, $4); check($$); 
+	 }
 
 if_block:
 	  IF OPEN_PARENTHESES relational_operation CLOSE_PARENTHESES braces
@@ -177,7 +181,8 @@ expression:
 	;
 
 function_call:
-	  VAR OPEN_PARENTHESES expression CLOSE_PARENTHESES { Token *function_name = (Token *)createOrFindVariable($1); check( function_name); $$ = (Token *)createFunctionCallToken(function_name, $3); check($$); }
+	VAR OPEN_PARENTHESES base_expression CLOSE_PARENTHESES { Token *function_name = (Token *)createOrFindVariable($1); check( function_name); $$ = (Token *)createFunctionCallToken(function_name, $3); check($$); }
+	;
 
 count_op:
 	  MULTI 	{ strcpy($$, "*"); }
@@ -273,6 +278,9 @@ check(Token * token) {
 	if (token == NULL) {
 		yyerror(&code, "Error allocating memory");
 	}
+	//if (token->basicInfo.type == IF_TOKEN) printf("HI\n");
+	//if (token->basicInfo.type == FUNCTION_DEF_TOKEN) printf("HI\n");
+	if (token->basicInfo.type == VARIABLE_TOKEN) printf("HI\n");
 
 	/* Must check that the type is correct (NULL = error):
 	 * Operation and assignment must have matching types */
